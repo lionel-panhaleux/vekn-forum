@@ -17,8 +17,9 @@ silos ([community.md](community.md)). Members log in with their archon account
   OAuth, have a genuinely good interface, allow CSS theming and some JS (VTES card display, icons),
   and be self-hosted: **Discourse multisite**, one site per community ([engine.md](engine.md)).
   *(Decided 2026-09-26.)*
-- **phpBB archives are imported**: boards, topics and posts under their legacy authors. A legacy
-  account is claimable — linked to an archon login once confirmed. *(Decided 2026-09-26.)*
+- **phpBB archives are imported**: boards, topics and posts under their legacy authors. Claiming is
+  automatic when the archon email matches; otherwise the NC merges. Login must stay as fluid as
+  possible — for most members, one archon consent screen and nothing else. *(Decided 2026-09-26.)*
 
 - **Public read, archon posts.** Anyone can read and search engines index; any archon account may
   post, VEKN ID or not, so newcomers can ask. A site may gate private categories (association board,
@@ -30,8 +31,8 @@ silos ([community.md](community.md)). Members log in with their archon account
   to a community's Discord and Telegram, configured by the NC; WhatsApp is a link only (no usable
   group API). *(Decided 2026-09-26.)*
 - **Mailing lists and newsletters run on Listmonk**, self-hosted beside Discourse, its subscribers
-  fed from the emails the login bridge holds. Discourse's own mail (notifications, digests) stays on.
-  *(Decided 2026-09-26.)*
+  fed by the login bridge from archon-verified emails. Discourse's own mail (notifications, digests)
+  stays on. *(Decided 2026-09-26.)*
 
 ## Rollout
 

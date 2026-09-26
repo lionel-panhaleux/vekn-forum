@@ -16,24 +16,40 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Section / playgroup | A category (subcategories for cities under a region). |
 | Prince leading a section | Member of the section's moderating group; the NC assigns it on their site. |
 | VTES card display, icons | Theme components, per site. |
-| Legacy phpBB author | Placeholder user from the phpBB3 importer, linked to an archon account when claimed. |
+| Legacy phpBB author | User from the phpBB3 importer, email kept; claimed as below. |
 
 ## Login
 
-archon is plain OAuth2 with PKCE and gives no email or name ([archon.md](archon.md)), which no
-Discourse login plugin handles whole. So login goes through **DiscourseConnect** backed by our own
-small bridge service. It runs the archon PKCE flow, reads `country` from archon's public API, and
-holds the two facts archon lacks — **username and email**, asked once on first login. Each site
-takes both from the payload and never edits them (`auth_overrides_username`,
-`auth_overrides_email`). The payload carries `external_id` = archon uid, `admin`, and membership of
-the **role groups** (one per archon role, e.g. `nc`, `prince`, `judge`).
+**DiscourseConnect** behind our own small bridge service; with it on, Discourse disables every
+other login (local, email link, OAuth) except `/u/admin-login` for admins. The bridge runs the
+archon PKCE flow, reads `country` from archon's public API, and signs each site a payload:
+
+- `external_id` = archon uid; `email` = the **verified** address from archon's `email` scope
+  ([archon.md](archon.md) — pending, see the board). The bridge passes it through and stores none.
+- **Never `require_activation`, never an unverified email.** Discourse links a new `external_id` to
+  an existing user by email only without it — that match *is* the legacy claim. With it, the match
+  is skipped and a legacy address fails as a duplicate; an unverified email without it would hand
+  a stranger the legacy account. A member with no verified email in archon is sent to archon to add
+  one.
+- `username` = a **suggestion** only, the member's preferred handle, asked once on first login and
+  the one thing the bridge stores. `auth_overrides_username` stays off: each site owns its
+  usernames, a claimed account keeps its phpBB name, and a collision gets a numeric suffix the
+  member can rename.
+- `admin` and the **role groups** (one per archon role, e.g. `nc`, `prince`, `judge`).
 
 The bridge owns `admin` outright and the role groups, nothing else: an NC delegates through
 moderators and section groups, never by granting admin. It sends only `add_groups`/`remove_groups`
 for its role groups, never the full `groups` list, so the section groups an NC assigns are never
-touched. Rights are re-pushed by the bridge, not only at login, so a revoked NC loses admin without
-logging in again. The same archon login creates the user on any site on first visit, so one user
-table per site stays invisible.
+touched. Rights are re-pushed through `sync_sso`, not only at login, so a revoked NC loses admin
+without logging in again. The same archon login creates the user on any site on first visit, so
+one user table per site stays invisible.
+
+**Claiming a legacy account.** Imported phpBB users keep their email, so a member whose archon
+email matches is linked on first login — posts and username included, nothing to click. The email
+match relinks even a user already linked to another archon uid; archon's unique addresses keep
+that from happening. A dead legacy address, or a guest-post placeholder (`anonymous_users`,
+`@no-email.invalid`), is merged by the site's NC through Discourse's admin user merge, which moves
+posts, quotes and mentions.
 
 ## Accepted costs
 
@@ -41,6 +57,8 @@ table per site stays invisible.
 - The Discourse team does not support self-hosted multisite configuration; all sites share plugins
   and upgrade together.
 
-Sources: meta.discourse.org/t/13045 (DiscourseConnect), /t/14084 (multisite),
+Sources: discourse/discourse `app/models/discourse_connect.rb` (`match_email_or_create_user`,
+`change_external_attributes_and_override`), `app/controllers/session_controller.rb`
+(`check_local_login_allowed`), `lib/user_merger.rb`; meta.discourse.org/t/14084 (multisite),
 github.com/discourse/discourse `script/import_scripts/phpbb3.rb`, `docs/INSTALL-cloud.md`; checked
 2026-09-26.
