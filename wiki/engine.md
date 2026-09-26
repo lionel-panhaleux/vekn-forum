@@ -22,16 +22,18 @@ alternative a future agent will be tempted to redo — the identity requirement 
 
 archon is plain OAuth2 with PKCE and gives no email or name ([archon.md](archon.md)), which no
 Discourse login plugin handles whole. So login goes through **DiscourseConnect** backed by our own
-small bridge service: it runs the archon PKCE flow, reads `country` from archon's public API, holds
-the one fact archon lacks — the member's email — and hands each site a signed payload with
-`external_id` = archon uid, `admin` and membership of the **role groups** (one per archon role,
-e.g. `nc`, `prince`, `judge`). The bridge owns those groups and nothing else: it only sends
-`add_groups`/`remove_groups` for them, never the full `groups` list, so the section groups an NC
-assigns on their site are never touched. Username and email are asked once, on first login, and
-held by the bridge. The same archon
-login creates the user on any site on first visit, so one user table per site stays invisible.
-Roles are re-pushed by the bridge, not only at login, so a revoked NC loses admin without logging
-in again.
+small bridge service. It runs the archon PKCE flow, reads `country` from archon's public API, and
+holds the two facts archon lacks — **username and email**, asked once on first login. Each site
+takes both from the payload and never edits them (`auth_overrides_username`,
+`auth_overrides_email`). The payload carries `external_id` = archon uid, `admin`, and membership of
+the **role groups** (one per archon role, e.g. `nc`, `prince`, `judge`).
+
+The bridge owns `admin` outright and the role groups, nothing else: an NC delegates through
+moderators and section groups, never by granting admin. It sends only `add_groups`/`remove_groups`
+for its role groups, never the full `groups` list, so the section groups an NC assigns are never
+touched. Rights are re-pushed by the bridge, not only at login, so a revoked NC loses admin without
+logging in again. The same archon login creates the user on any site on first visit, so one user
+table per site stays invisible.
 
 ## Accepted costs
 

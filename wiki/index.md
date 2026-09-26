@@ -13,7 +13,7 @@ Plans, findings and reasoning journeys do not live here — they die with their 
 ## Dogmas
 
 - [dogmas.md](dogmas.md) — the paradigms chosen by the human: data, engine, code, testing,
-  dependencies, commits. Ingress and egress check against this page.
+  dependencies, commits, human inflexion points. Ingress and egress check against this page.
 
 ## Domain
 
