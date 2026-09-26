@@ -1,0 +1,32 @@
+# Discourse's database container, written by vekn-forum/deploy: Postgres and Redis for every site.
+# Rebuilt only when this file changes; `app` is built and swapped while it keeps running.
+templates:
+  - "templates/postgres.template.yml"
+  - "templates/redis.template.yml"
+
+params:
+  db_shared_buffers: "512MB"
+  db_default_text_search_config: "pg_catalog.english"
+
+env:
+  LC_ALL: en_US.UTF-8
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US.UTF-8
+  # the postgres template sets it on the `discourse` role: `app` connects over the containers' link
+  DISCOURSE_DB_PASSWORD: "{{ db_password }}"
+
+volumes:
+  - volume:
+      host: {{ data_dir }}
+      guest: /shared
+  - volume:
+      host: {{ data_dir }}/log/var-log
+      guest: /var/log
+
+hooks:
+  after_postgres:
+{% for site in extra_sites %}
+    - exec: sudo -u postgres createdb discourse_{{ site.db }} || exit 0
+    - exec: sudo -u postgres psql discourse_{{ site.db }} -c "grant all privileges on database discourse_{{ site.db }} to discourse; alter schema public owner to discourse;"
+    - exec: sudo -u postgres psql discourse_{{ site.db }} -c "create extension if not exists hstore; create extension if not exists pg_trgm; create extension if not exists vector;"
+{% endfor %}

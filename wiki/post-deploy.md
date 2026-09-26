@@ -36,6 +36,6 @@ finishes without an archon error — its daemon token accepted by archon's publi
 Gated by the same commit. On frankfurt:
 `https://fr.forum.krcg.org` and `https://intl.forum.krcg.org` render their site, in French and
 English; `/u/admin-login` on either mails a login link to the developer email. The morning after the
-first deploy, `ls /var/discourse/shared/standalone/backups/*/` lists one archive per site, and
+first deploy, `ls /var/discourse/shared/web-only/backups/*/` lists one archive per site, and
 `sudo systemctl status vekn-forum-discourse-backup` shows a push to `vekn_forum_discourse`, with no
 orphan warning for it in `journalctl -t postgres-backup`.

@@ -1,16 +1,18 @@
-# Discourse's launcher container, written by vekn-forum/deploy: every site of the multisite.
+# Discourse's web container, written by vekn-forum/deploy: every site of the multisite, its database
+# in the `data` container. A change here bootstraps a new image while this one serves, then swaps.
 templates:
-  - "templates/postgres.template.yml"
-  - "templates/redis.template.yml"
   - "templates/web.template.yml"
   # host nginx terminates TLS and proxies to /shared/nginx.http.sock: no published port, which
   # Docker would open past UFW
   - "templates/web.socketed.template.yml"
 
+links:
+  - link:
+      name: data
+      alias: data
+
 params:
   version: {{ ref }}
-  db_shared_buffers: "512MB"
-  db_default_text_search_config: "pg_catalog.english"
 
 env:
   LC_ALL: en_US.UTF-8
@@ -19,6 +21,10 @@ env:
   UNICORN_WORKERS: 4
   DISCOURSE_HOSTNAME: "{{ default_domain }}"
   DISCOURSE_DEVELOPER_EMAILS: "{{ developer_emails }}"
+  DISCOURSE_DB_SOCKET: ""
+  DISCOURSE_DB_HOST: data
+  DISCOURSE_DB_PASSWORD: "{{ db_password }}"
+  DISCOURSE_REDIS_HOST: data
   DISCOURSE_SMTP_ADDRESS: smtp.gmail.com
   DISCOURSE_SMTP_PORT: 587
   DISCOURSE_SMTP_USER_NAME: "{{ mail }}"
@@ -32,19 +38,13 @@ env:
 
 volumes:
   - volume:
-      host: /var/discourse/shared/standalone
+      host: {{ web_dir }}
       guest: /shared
   - volume:
-      host: /var/discourse/shared/standalone/log/var-log
+      host: {{ web_dir }}/log/var-log
       guest: /var/log
 
 hooks:
-  after_postgres:
-{% for site in extra_sites %}
-    - exec: sudo -u postgres createdb discourse_{{ site.db }} || exit 0
-    - exec: sudo -u postgres psql discourse_{{ site.db }} -c "grant all privileges on database discourse_{{ site.db }} to discourse; alter schema public owner to discourse;"
-    - exec: sudo -u postgres psql discourse_{{ site.db }} -c "create extension if not exists hstore; create extension if not exists pg_trgm; create extension if not exists vector;"
-{% endfor %}
   before_bundle_exec:
     - file:
         path: $home/config/multisite.yml
@@ -53,6 +53,9 @@ hooks:
           {{ site.db }}:
             adapter: postgresql
             database: discourse_{{ site.db }}
+            host: data
+            username: discourse
+            password: "{{ db_password }}"
             pool: 25
             timeout: 5000
             host_names:

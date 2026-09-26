@@ -23,7 +23,9 @@ DEFAULT = "intl"
 REF = (REPO / "discourse/ref").read_text().strip()
 LAUNCHER_REF = "8d705a91866c320592ce851f30895ddb4c3e85fe"  # discourse/discourse_docker
 DISCOURSE = "/var/discourse"
-SHARED = f"{DISCOURSE}/shared/standalone"
+# one directory per container: `data` holds Postgres and Redis, `app` the uploads and backups
+DATA = f"{DISCOURSE}/shared/data"
+WEB = f"{DISCOURSE}/shared/web-only"
 MAIL = "codex.of.the.damned@gmail.com"
 DEVELOPER_EMAILS = "lionel.panhaleux@gmail.com"
 NAME = "vekn_forum"
@@ -108,7 +110,7 @@ server.user(
 )
 files.directory(name="Config dir", path=ETC, user="root", group=NAME, mode="750")
 
-# --- Discourse: the official launcher, one container for every site
+# --- Discourse: the official launcher, a database container and a web container for every site
 
 apt.packages(name="Docker", packages=["docker.io"], update=True, cache_time=3600)
 systemd.service(name="Docker running", service="docker", running=True, enabled=True)
@@ -127,30 +129,68 @@ if marker(f"{DISCOURSE}/.git/HEAD") != LAUNCHER_REF:
         )
     )
 files.directory(name="Launcher containers", path=f"{DISCOURSE}/containers", mode="700")
+extra_sites = [
+    {"db": s["db"], "domain": domain(site)} for site, s in SITES.items() if site != DEFAULT
+]
+data_yml = put_secret(
+    "Discourse data.yml",
+    render(
+        "data.yml.j2",
+        data_dir=DATA,
+        db_password=secrets["discourse_db_password"],
+        extra_sites=extra_sites,
+    ),
+    f"{DISCOURSE}/containers/data.yml",
+)
 app_yml = put_secret(
     "Discourse app.yml",
     render(
         "app.yml.j2",
         ref=REF,
+        web_dir=WEB,
         host_ip=host.data.ssh_hostname,
         default_domain=domain(DEFAULT),
         developer_emails=DEVELOPER_EMAILS,
+        db_password=secrets["discourse_db_password"],
         mail=MAIL,
         mail_password=secrets["mail_password"],
-        extra_sites=[
-            {"db": s["db"], "domain": domain(site)} for site, s in SITES.items() if site != DEFAULT
-        ],
+        extra_sites=extra_sites,
     ),
     f"{DISCOURSE}/containers/app.yml",
 )
-running = (
-    host.get_fact(Command, "docker inspect -f '{{.State.Running}}' app 2>/dev/null || true")
-    == "true"
+
+
+def container_running(name: str) -> bool:
+    return (
+        host.get_fact(
+            Command, f"docker inspect -f '{{{{.State.Running}}}}' {name} 2>/dev/null || true"
+        )
+        == "true"
+    )
+
+
+data_running, app_running = container_running("data"), container_running("app")
+data = server.shell(
+    name="Rebuild Discourse's database (every site down meanwhile)",
+    commands=[f"cd {DISCOURSE} && ./launcher rebuild data"],
+    _if=lambda: not data_running or any_changed(data_yml, *launcher)(),
 )
-rebuild = server.shell(
-    name="Rebuild Discourse (minutes of downtime)",
-    commands=[f"cd {DISCOURSE} && ./launcher rebuild app"],
-    _if=lambda: not running or any_changed(app_yml, *launcher)(),
+# `bootstrap` builds the new image while the running container serves; only the swap is downtime.
+swap = server.shell(
+    name="Build Discourse, then swap it in",
+    commands=[
+        f"cd {DISCOURSE} && ./launcher bootstrap app",
+        f"cd {DISCOURSE} && if docker inspect app > /dev/null 2>&1; then ./launcher destroy app; fi",
+        f"cd {DISCOURSE} && ./launcher start app",
+        "docker image prune -f",
+    ],
+    _if=lambda: not app_running or any_changed(app_yml, *launcher)(),
+)
+# the containers' link resolves the database's address when `app` starts
+server.shell(
+    name="Restart Discourse on its rebuilt database",
+    commands=[f"cd {DISCOURSE} && ./launcher restart app"],
+    _if=lambda: data.did_change() and not swap.did_change(),
 )
 
 # --- Sites: settings and the bridge's API key, from discourse/site.rb
@@ -159,7 +199,7 @@ site_rb = (REPO / "discourse/site.rb").read_bytes()
 files.put(
     name="Site settings script",
     src=str(REPO / "discourse/site.rb"),
-    dest=f"{SHARED}/vekn-forum-site.rb",
+    dest=f"{WEB}/vekn-forum-site.rb",
 )
 provisioned = []
 for site, s in SITES.items():
@@ -177,8 +217,9 @@ for site, s in SITES.items():
     site_env = f"{ETC}/site-{site}.env"
     put_secret(f"{site} site env", content, site_env)
     # A marker, not the upload's did_change: a run that uploaded then failed must not look finished.
+    # It lives beside the database it describes, and goes with it.
     expected = digest(site_rb, content.encode())
-    done = f"{ETC}/site-{site}.provisioned"
+    done = f"{DATA}/vekn-forum-site-{site}.provisioned"
     if marker(done) != expected:
         provisioned.append(
             server.shell(
@@ -196,7 +237,7 @@ for site, s in SITES.items():
         site=f"{NAME}_{site}",
         domain=domain(site),
         type="proxy",
-        upstream=f"http://unix:{SHARED}/nginx.http.sock:",
+        upstream=f"http://unix:{WEB}/nginx.http.sock:",
     )
 
 # --- Backups: each site's own daily archive, pushed to the fleet's restic bucket
@@ -336,5 +377,5 @@ swept = host.get_fact(Command, f"systemctl show -p Result --value {units['sweep'
 server.shell(
     name="Sweep now",
     commands=[f"systemctl start {units['sweep']}"],
-    _if=lambda: not swept or any_changed(rebuild, *provisioned)(),
+    _if=lambda: not swept or any_changed(data, swap, *provisioned)(),
 )

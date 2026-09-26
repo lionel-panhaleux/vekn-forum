@@ -67,16 +67,22 @@ deploy — the deploy refuses otherwise, since every failed Let's Encrypt valida
 limit.
 
 **Discourse** runs from its official launcher (`/var/discourse`, discourse_docker pinned in
-`deploy.py`, Discourse at `discourse/ref`), one container `app` holding every site, its Postgres and
-Redis. `containers/app.yml` is written by the deploy; a change to it runs `./launcher rebuild app`,
-which takes every site down for minutes. The container publishes no port: its nginx listens on
-`/var/discourse/shared/standalone/nginx.http.sock`, behind the host's nginx, which terminates TLS
-(server-setup's `nginx_site`). For the sweep, it raises `DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE`,
+`deploy.py`, Discourse at `discourse/ref`) as two containers, both written by the deploy: `data`
+(Postgres and Redis for every site, `shared/data`) and `app` (every site's web and background
+processes, `shared/web-only`). A change to `app.yml` bootstraps the new image while the old
+container serves, then swaps them: the sites are down only while the new one starts. A change to
+`data.yml` rebuilds the database, every site down meanwhile, and restarts `app`. The two-container
+split is what makes the swap safe: a single container's bootstrap would start a second Postgres on
+the live data. *(Decided 2026-09-26.)* Nothing is published: `data` is reached only through its
+link from `app`, and `app`'s nginx listens on `/var/discourse/shared/web-only/nginx.http.sock`,
+behind the host's nginx, which terminates TLS
+(server-setup's `nginx_site`). For the sweep, `app` raises `DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE`,
 exempts the host's own address from the per-IP limits — counted across every site together — and
 leaves out the launcher's nginx rate limit, which has no exemption. It sends mail through Gmail
 SMTP as `codex.of.the.damned@gmail.com`, and makes
 `DISCOURSE_DEVELOPER_EMAILS` admin: the break-glass login at `/u/admin-login`. Each site's settings
-come from `discourse/site.rb`, re-run whenever it or the site's values change.
+come from `discourse/site.rb`, re-run whenever it or the site's values change, or the database is
+new: its marker lives in `shared/data`.
 
 **The bridge** runs as `vekn-forum-bridge` (uvicorn on `127.0.0.1:8030`, user `vekn_forum`, database
 `vekn_forum` on the host cluster by peer auth), its environment in `/etc/vekn_forum/bridge.env`.
@@ -85,10 +91,11 @@ provisioned, since it creates the role groups a login names.
 
 **Backups.** The bridge's database is in the host's nightly Postgres backup. Each Discourse site
 writes its own daily archive — database and uploads — under
-`/var/discourse/shared/standalone/backups/<db>/`, and `vekn-forum-discourse-backup.timer` pushes
+`/var/discourse/shared/web-only/backups/<db>/`, and `vekn-forum-discourse-backup.timer` pushes
 that directory to the fleet's restic bucket, repo `vekn_forum_discourse`. To restore one site:
 `restic restore` the archive, drop it in that directory, then
-`cd /var/discourse && ./launcher enter app` and `discourse enable_restore`, then `RAILS_DB=<db> discourse restore <file>`.
+`cd /var/discourse && ./launcher enter app`, `discourse enable_restore`, and
+`RAILS_DB=<db> discourse restore <file>`.
 
 **Secrets** (`just secrets`): `bridge_secret`, `mail_password`, per site `<site>_connect_secret` and
 `<site>_api_key` (the deploy gives both to the site and to the bridge), and
