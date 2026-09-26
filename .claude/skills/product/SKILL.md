@@ -1,6 +1,6 @@
 ---
 name: product
-description: The product lens — make VTES community management effortless for coordinators (NC, IC, PTC, Rulemonger) and section leads (Prince, language leads), on clean, mobile-first, noise-free screens. `/product scout` hunts time-savers in their recurring jobs; `/product audit <surface>` runs a keep/cut/merge subtraction pass at phone width. Also the gate /intake and /ship apply to any user-facing change. Use when designing, reviewing or questioning anything a user sees, or when looking for what to build next.
+description: The product lens — make VTES community management effortless for community coordinators and section leads, on clean, mobile-first, noise-free screens. `/product scout` hunts time-savers in their recurring jobs; `/product audit <surface>` runs a keep/cut/merge subtraction pass at phone width. Also the gate /intake and /ship apply to any user-facing change. Use when designing, reviewing or questioning anything a user sees, or when looking for what to build next.
 ---
 
 # /product — less, and the right less

@@ -1,8 +1,8 @@
 # CLAUDE.md
 
 A shared forum platform for **VEKN** communities (VTES): one deployment, one site per community
-with its own graphical identity, login through **archon**, coordinators (NC, IC, PTC) administering
-their community and section leads (Princes, language leads) under them. Built on an adopted
+with its own graphical identity, login through **archon**, coordinators administering their community
+and section leads under them ([`wiki/product.md#personas`](wiki/product.md#personas)). Built on an adopted
 open-source forum engine, not written from scratch — see [`wiki/product.md`](wiki/product.md).
 
 ## Three lifespans
@@ -37,7 +37,7 @@ Context lives in the wiki, asks live on the board. Never the other way round.
   substantive changes land here.
 - **`/upkeep`** — maintenance, every 20 shipped lines or monthly: wiki lint, board eviction, harness
   ratchet.
-- **`/product`** — the product lens: `scout` for coordinator time-savers, `audit` for
+- **`/product`** — the product lens: `scout` for coordinator and section-lead time-savers, `audit` for
   keep/cut/merge at phone width, and the gate `/intake` and
   `/ship` apply to anything a user sees.
 

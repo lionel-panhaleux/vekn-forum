@@ -1,7 +1,7 @@
 # Engine
 
 **Discourse, in multisite mode.** *(Decided 2026-09-26.)* The only open-source engine where each
-community is truly its own forum administered by its NC, with a maintained phpBB importer that
+community is truly its own forum administered by its coordinator, with a maintained phpBB importer that
 keeps old URLs alive, and the best interface of the field. NodeBB fits our no-Docker infra better
 but offers only per-category branding under global admins and no maintained importer; that is the
 alternative a future agent will be tempted to redo — the identity requirement is what rules it out.
@@ -10,14 +10,14 @@ alternative a future agent will be tempted to redo — the identity requirement 
 
 | Ours | Discourse |
 |---|---|
-| Community space (France, Germany, …) | One **site** of the multisite: own database, theme, locale, settings, admins, domain. |
-| International community | Its own site; ICs are its admins. |
-| Playtest community | Its own site (NDA content isolated in its own database); PTCs are its admins. |
-| Judges | A section of the international site, moderated by the Rulemongers' role group. |
-| Language section (playtest, judges) | A subcategory visible only to its language group (`pt-fr`, `judge-fi`, …), owned by its language lead, who adds members without being admin. The role-wide English section is muted by default through the role group's default notification levels: opt-in. |
-| NC | `admin` on the site of their archon `country`. |
-| Section / playgroup | A category (subcategories for cities under a region). |
-| Prince leading a section | Member of the section's moderating group; the NC assigns it on their site. |
+| National community (France, Germany, …) | One **site** of the multisite: own database, theme, locale, settings, admins, domain. |
+| International community | Its own site. |
+| Playtest community | Its own site, NDA content isolated in its own database; `login_required`, readable only by PT and PTC holders, never indexed. |
+| Coordinator | `admin` on their community's site: an NC on the site of their archon `country`, ICs on the international site, **every PTC** on the playtest site. *(Decided 2026-09-26.)* |
+| Section | A category (subcategories for cities under a region), plus its **section group**, which watches the category by default. Playgroup groups are open to join; language groups (`pt-fr`, `judge-fi`, …) are added to by their owner only, and their category is visible to that group alone. |
+| Section lead | Owner of the section group, and in the category's moderating group — both set by the coordinator. Owning a group needs no admin. |
+| Judges | A section of the international site; Rulemongers moderate it and own its language groups' creation. |
+| Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
 | Base theme, card display | One remote git theme with its components, installed on every site and updated from git. |
 | Community identity | That theme's settings on each site: the tokens of [design.md#theming](design.md#theming). |
 | Legacy phpBB author | User from the phpBB3 importer, email kept; claimed as below. |
@@ -41,12 +41,12 @@ archon PKCE flow, reads `country` from archon's public API, and signs each site 
   member can rename.
 - `admin` and the **role groups** (one per archon role, e.g. `nc`, `prince`, `judge`).
 
-The bridge owns `admin` outright and the role groups, nothing else: an NC delegates through
-moderators and section groups, never by granting admin. It sends only `add_groups`/`remove_groups`
-for its role groups, never the full `groups` list, so the section groups an NC assigns are never
-touched — except that a member losing an archon role is removed from that role's language groups
-(`pt-*`, `judge-*`): archon decides who may be in them, the lead decides which language. Rights
-are re-pushed through `sync_sso`, not only at login, so a revoked NC loses admin
+The bridge owns exactly three things: `admin`; the role groups; and **removal from language
+groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
+Rulemonger; it finds them through the Discourse API by that prefix, so a language group must carry
+it. Archon decides who may be in a language group, its owner decides which language. Coordinators
+delegate through moderators and section groups, never by granting admin. The bridge sends only
+`add_groups`/`remove_groups` for the names it owns, never the full `groups` list. Rights are re-pushed through `sync_sso`, not only at login, so a revoked NC loses admin
 without logging in again. The same archon login creates the user on any site on first visit, so
 one user table per site stays invisible.
 

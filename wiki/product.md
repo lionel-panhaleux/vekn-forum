@@ -11,8 +11,8 @@ Every community has a **coordinator** who administers it and **section leads** u
 | Community | Coordinator | Sections | Section lead |
 |---|---|---|---|
 | National | NC | playgroups (city, shop, bar night) | Prince |
-| International | IC | topics; the judges' section by language | Rulemonger over language leads |
-| Playtest | lead PTC | languages | language PTC |
+| International | IC | topics, and the judges' section | Rulemonger for the judges, by language |
+| Playtest | PTCs (all admins) | languages | the PTC owning that language |
 
 Recurring jobs, most frequent first. The console serves the coordinator's and section lead's
 ([design.md#console](design.md#console)); a user-facing change that serves none of them is cut at
@@ -31,13 +31,15 @@ ingress. *(Decided 2026-09-26.)*
 ## Scope
 
 - **One deployment, one site per community**: each national community, the international community,
-  and the playtest community. **A community gets its own site only when its content is
-  confidential** — playtest (NDA) does; the judges are a section of the international site.
-  *(Decided 2026-09-26.)* Each site has its **own graphical identity** — logo, colours, icons, styles — so it reads as that association's
-  forum, optionally under the association's own domain. Cross-community sections (international,
-  English) live on the same platform. *(Decided 2026-09-26.)*
+  and the playtest community. **A role community gets its own site only when its content is
+  confidential** — playtest (NDA) does; the judges are a section of the international site. Each
+  site has its **own graphical identity** — logo, colours, icons, styles — so it reads as that
+  community's forum, optionally under the association's own domain. *(Decided 2026-09-26.)*
 - **Coordinators administer their community** (personas above): they configure its identity,
-  sections and moderators without being platform admins; section leads run their section. The platform owns sections and the Prince → section assignment ([archon.md#roles](archon.md#roles)).
+  sections and moderators without being platform admins; section leads run their section. The
+  platform owns sections and the section lead → section assignment (Prince → playgroup, language
+  lead → language group), since archon roles have no scope below the country
+  ([archon.md#roles](archon.md#roles)).
 - **Adopt an existing open-source forum engine** rather than building one. It must support external
   OAuth, have a genuinely good interface, allow CSS theming and some JS (VTES card display, icons),
   and be self-hosted: **Discourse multisite**, one site per community ([engine.md](engine.md)).
@@ -46,7 +48,8 @@ ingress. *(Decided 2026-09-26.)*
   automatic when the archon email matches; otherwise the coordinator merges. Login must stay as fluid as
   possible — for most members, one archon consent screen and nothing else. *(Decided 2026-09-26.)*
 
-- **Public read, archon posts.** Anyone can read and search engines index; any archon account may
+- **Public read, archon posts** — except the playtest site, readable only by PT and PTC holders and
+  never indexed. Elsewhere anyone can read and search engines index; any archon account may
   post, VEKN ID or not, so newcomers can ask. A site may gate private categories (association board,
   organizers) by group. *(Decided 2026-09-26.)*
 - **Tournaments come from archon.** Each upcoming archon tournament is mirrored as a topic in its
@@ -56,7 +59,7 @@ ingress. *(Decided 2026-09-26.)*
   to a community's Discord and Telegram, configured by the coordinator; WhatsApp is a link only (no usable
   group API). *(Decided 2026-09-26.)*
 - **Mailing lists and newsletters run on Listmonk**, self-hosted beside Discourse. **Every list
-  mirrors a Discourse group** — a community, a playgroup, the playtesters of a language, the judges —
+  mirrors a Discourse group** — a community, a section (playgroup, language) —
   kept in sync by the login bridge, so mailing a group is the same act everywhere. Discourse's own
   mail (notifications, digests) stays on. *(Decided 2026-09-26.)*
 
