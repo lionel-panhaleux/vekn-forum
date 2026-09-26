@@ -1,5 +1,7 @@
 import hashlib
 import socket
+import subprocess
+import tempfile
 from io import StringIO
 from pathlib import Path
 
@@ -277,46 +279,57 @@ systemd.service(
 files.directory(name="Bridge root", path=OPT, user=NAME, group=NAME, mode="755")
 postgres_db(database=NAME, owner=NAME)
 
-sources = ["pyproject.toml", "uv.lock", "LICENSE", ".python-version"]
+# Ship the built wheel, never the source tree: only what the package declares reaches the server.
+dist = Path(tempfile.mkdtemp())
+subprocess.run(["uv", "build", "--wheel", "--quiet", "--out-dir", dist], cwd=REPO, check=True)
+(wheel,) = dist.glob("*.whl")
+requirements = subprocess.run(
+    ["uv", "export", "--frozen", "--no-dev", "--no-emit-project", "--no-header", "--no-annotate"],
+    cwd=REPO,
+    check=True,
+    capture_output=True,
+    text=True,
+).stdout
+expected = digest(requirements.encode(), wheel.read_bytes())
+# A wheel is binary and pyinfra diffs any file it replaces: each build lands in a new directory instead.
+installed = f"dist/{expected}/{wheel.name}"
 code = [
-    *(
-        files.put(name=f"Upload {f}", src=str(REPO / f), dest=f"{OPT}/{f}", user=NAME, group=NAME)
-        for f in sources
-    ),
-    files.sync(
-        name="Upload src",
-        src=str(REPO / "src"),
-        dest=f"{OPT}/src",
+    files.put(
+        name="Upload requirements",
+        src=StringIO(requirements),
+        dest=f"{OPT}/requirements.txt",
         user=NAME,
         group=NAME,
-        delete=True,
-        exclude_dir="__pycache__",
+    ),
+    files.put(
+        name="Upload wheel",
+        src=str(wheel),
+        dest=f"{OPT}/{installed}",
+        user=NAME,
+        group=NAME,
     ),
 ]
-expected = digest(
-    *(
-        path.read_bytes()
-        for path in [
-            *(REPO / f for f in sources),
-            *sorted(
-                p for p in (REPO / "src").rglob("*") if p.is_file() and "__pycache__" not in p.parts
-            ),
-        ]
-    )
-)
 if marker(f"{OPT}/.venv/.deployed") != expected:
     code.append(
         server.shell(
             name="Install the bridge",
             commands=[
-                f"{UV} sync --frozen --no-dev --no-editable --no-cache --python /usr/bin/python3",
-                f"echo {expected} > {OPT}/.venv/.deployed",
+                f"test -d .venv || {UV} venv --python /usr/bin/python3 .venv",
+                f"{UV} pip sync --no-cache requirements.txt",
+                f"{UV} pip install --no-cache --no-deps --reinstall {installed}",
+                f"echo {expected} > .venv/.deployed",
             ],
             _sudo_user=NAME,
             _env={"UV_PYTHON_DOWNLOADS": "never"},
             # uv reads uv.toml from the working directory: the SSH user's home is off limits
             _chdir=OPT,
         )
+    )
+    server.shell(
+        name="Drop older wheels",
+        commands=[
+            f"find {OPT}/dist -mindepth 1 -maxdepth 1 ! -name {expected} -exec rm -rf {{}} +"
+        ],
     )
 
 bridge_env = {
