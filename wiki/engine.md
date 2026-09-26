@@ -12,9 +12,9 @@ alternative a future agent will be tempted to redo — the identity requirement 
 |---|---|
 | National community (France, Germany, …) | One **site** of the multisite: own database, theme, locale, settings, admins, domain. |
 | International community | Its own site. |
-| Playtest community | Its own site, NDA content isolated in its own database; `login_required`, readable only by PT and PTC holders, never indexed. |
+| Playtest community | Its own site, NDA content isolated in its own database. Two locks: the bridge admits only PT and PTC holders to it, and every category's security grants the `pt` and `ptc` role groups only, `everyone` removed. `login_required`, not indexed. |
 | Coordinator | `admin` on their community's site: an NC on the site of their archon `country`, ICs on the international site, **every PTC** on the playtest site. *(Decided 2026-09-26.)* |
-| Section | A category (subcategories for cities under a region), plus its **section group**, which watches the category by default. Playgroup groups are open to join; language groups (`pt-fr`, `judge-fi`, …) are added to by their owner only, and their category is visible to that group alone. |
+| Section | A category (subcategories for cities under a region), plus its **section group**, which watches the category's first posts by default. Playgroup groups are open to join; language groups (`pt-fr`, `judge-fi`, …) are added to by their owner only, and their category is visible to that group alone. |
 | Section lead | Owner of the section group, and in the category's moderating group — both set by the coordinator. Owning a group needs no admin. |
 | Judges | A section of the international site, moderated by Rulemongers; its language groups are created by an IC. |
 | Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
@@ -41,8 +41,9 @@ archon PKCE flow, reads `country` from archon's public API, and signs each site 
   member can rename.
 - `admin` and the **role groups** (one per archon role, e.g. `nc`, `prince`, `judge`).
 
-The bridge owns exactly three things: `admin`; the role groups; and **removal from language
-groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
+The bridge owns exactly four things: `admin`; the role groups; **admission to the playtest site** —
+it refuses a playtest payload without PT or PTC, and suspends there a member who loses both; and
+**removal from language groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
 Rulemonger; it finds them through the Discourse API by that prefix, so a language group must carry
 it. Archon decides who may be in a language group, its owner decides which language. Coordinators
 delegate through moderators and section groups, never by granting admin. The bridge sends only

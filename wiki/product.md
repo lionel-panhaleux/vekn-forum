@@ -34,7 +34,7 @@ ingress. *(Decided 2026-09-26.)*
   and the playtest community. **A role community gets its own site only when its content is
   confidential** — playtest (NDA) does; the judges are a section of the international site. Each
   site has its **own graphical identity** — logo, colours, icons, styles — so it reads as that
-  community's forum, optionally under the association's own domain. *(Decided 2026-09-26.)*
+  community's forum; a national site may sit under its association's own domain. *(Decided 2026-09-26.)*
 - **Coordinators administer their community** (personas above): they configure its identity,
   sections and moderators without being platform admins; section leads run their section. The
   platform owns sections and the section lead → section assignment (Prince → playgroup, language
