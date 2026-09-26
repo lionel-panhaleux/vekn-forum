@@ -51,7 +51,7 @@ for name in [BASE, *map(domain, SITES)]:
         raise RuntimeError(f"{name} resolves to {ip}, not {host.data.ssh_hostname}")
 
 secrets = load(str(HERE / "secrets.sops.yaml"))
-if "archon_client_secret" not in secrets:
+if not {"archon_client_id", "archon_client_secret"} <= secrets.keys():
     raise RuntimeError(
         "no archon client in `just secrets` yet: register it first (wiki/operations.md#deploy)"
     )

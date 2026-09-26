@@ -1,5 +1,5 @@
-# One site's settings for the bridge (wiki/engine.md#login, wiki/operations.md#deploy), run by `rails runner` with RAILS_DB set;
-# the dev stack and the deploy both run it. Every value comes from the environment.
+# One site's settings (wiki/engine.md#login, wiki/operations.md#deploy), run by `rails runner` with
+# RAILS_DB set; the dev stack and the deploy both run it. Every value comes from the environment.
 
 # Group names are validated as usernames: 3 characters minimum by default, and the role groups the
 # bridge creates include `ic`, `nc`, `pt`.
