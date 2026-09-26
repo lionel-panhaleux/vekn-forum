@@ -30,7 +30,10 @@ async def test_a_first_login_asks_a_username_once_and_creates_the_user(archon, b
     assert response.url.path == "/username"
     response = await browser.post(str(response.url), data={"username": "no spaces"})
     assert response.status_code == 400
-    response = await browser.post(str(response.url), data={"username": name})
+    form = str(response.url)
+    # A double tap: the first redirect is dropped by the browser, the second must land.
+    assert (await browser.post(form, data={"username": name}, follow_redirects=False)).is_redirect
+    response = await browser.post(form, data={"username": name})
     assert response.json()["current_user"]["username"] == name
     user = await discourse_user("fr", uid)
     assert user["username"] == name

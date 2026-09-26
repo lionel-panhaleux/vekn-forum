@@ -213,7 +213,9 @@ async def remember(conn: psycopg.AsyncConnection, uid: str, username: str) -> No
 async def finish(request: Request, username: str) -> RedirectResponse:
     """Sign the site its payload. `require_activation` is never sent: without it Discourse links
     the login to an existing account with the same email — the legacy claim (wiki/engine.md)."""
-    login = request.session.pop("login")
+    # Kept, not popped: a double tap on the username form must land too, and the browser follows
+    # only the last redirect. Discourse spends the nonce, so the payload still logs in once.
+    login = request.session["login"]
     site = login["site"]
     fields = await discourse.rights(site, login["uid"], login["roles"], login["country"])
     fields |= {"nonce": login["nonce"], "email": login["email"], "username": username}
@@ -241,8 +243,8 @@ def username_form(lang: str, value: str = "", error: bool = False) -> HTMLRespon
         t["username"],
         f'<form method="post"><label for="u">{t["username_label"]}</label>'
         f'<input id="u" name="username" value="{html.escape(value)}" required autofocus '
-        'autocomplete="username" autocapitalize="none" spellcheck="false">'
-        + (f'<p class="error">{t["username_rule"]}</p>' if error else "")
+        'maxlength="20" autocomplete="username" autocapitalize="none" spellcheck="false">'
+        + f"<p{' class="error"' if error else ''}>{t['username_rule']}</p>"
         + f'<button class="button">{t["continue"]}</button></form>',
         400 if error else 200,
     )
