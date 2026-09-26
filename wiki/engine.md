@@ -16,7 +16,7 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Coordinator | `admin` on their community's site: an NC on the site of their archon `country`, ICs on the international site, **every PTC** on the playtest site. *(Decided 2026-09-26.)* |
 | Section | A category (subcategories for cities under a region), plus its **section group**, which watches the category by default. Playgroup groups are open to join; language groups (`pt-fr`, `judge-fi`, …) are added to by their owner only, and their category is visible to that group alone. |
 | Section lead | Owner of the section group, and in the category's moderating group — both set by the coordinator. Owning a group needs no admin. |
-| Judges | A section of the international site; Rulemongers moderate it and own its language groups' creation. |
+| Judges | A section of the international site, moderated by Rulemongers; its language groups are created by an IC. |
 | Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
 | Base theme, card display | One remote git theme with its components, installed on every site and updated from git. |
 | Community identity | That theme's settings on each site: the tokens of [design.md#theming](design.md#theming). |
