@@ -33,6 +33,15 @@ silos ([community.md](community.md)). Members log in with their archon account
   fed from the emails the login bridge holds. Discourse's own mail (notifications, digests) stays on.
   *(Decided 2026-09-26.)*
 
+## Rollout
+
+- **France pilots**: its import, legacy-account claiming and identity are proven at full scale on one
+  site before other communities are offered one. *(Decided 2026-09-26.)*
+- **Domains**: every site has a platform subdomain; an association may point its own domain at its
+  site, which also carries its old phpBB URL redirects. *(Decided 2026-09-26.)*
+- **Ownership**: runs on Lionel's infra and account for now, to be handed to VEKN if it takes.
+  *(Decided 2026-09-26.)*
+
 ## Deliberately not
 
 - **Not a chat platform.** Chat groups live in WhatsApp, Telegram and Discord; Discourse's built-in
