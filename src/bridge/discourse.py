@@ -4,6 +4,7 @@ Each site is configured from `DISCOURSE_<SITE>_*` — wiki/operations.md lists t
 """
 
 import base64
+import datetime
 import hashlib
 import hmac
 import os
@@ -90,8 +91,15 @@ async def api(site: str, method: str, path: str, **kwargs) -> dict:
 
 
 async def sync(site: str, fields: dict[str, str]) -> dict:
-    """Push a payload without a login; creates the user if it does not exist yet."""
+    """Push a payload to an existing user without a login."""
     return await api(site, "POST", "/admin/users/sync_sso", data=encode(site, fields))
+
+
+async def create_role_groups(site: str) -> None:
+    """A payload naming a group that does not exist is silently ignored by Discourse."""
+    existing = set(await groups(site, ""))
+    for name in [r.lower() for r in ROLES if r.lower() not in existing]:
+        await api(site, "POST", "/admin/groups.json", data={"group[name]": name})
 
 
 async def groups(site: str, prefix: str) -> list[str]:
@@ -108,7 +116,7 @@ async def groups(site: str, prefix: str) -> list[str]:
 async def user_ids(site: str) -> set[int]:
     """Whoever the bridge may have to take rights from: admins, role and language group members,
     and on a gated site every user, since admission itself can be lost."""
-    lists = ["active", "suspended"] if env(site, "MEMBERS", "") else ["admins"]
+    lists = ["active"] if env(site, "MEMBERS", "") else ["admins"]
     ids = set()
     for query in lists:
         page = 1
@@ -162,11 +170,16 @@ async def admit(site: str, detail: dict, roles: list[str]) -> None:
     if not env(site, "MEMBERS", ""):
         return
     user_id = detail["id"]
+    until = detail.get("suspended_till")
+    # An expired suspension keeps its date.
+    suspended = bool(until) and datetime.datetime.fromisoformat(until) > datetime.datetime.now(
+        datetime.UTC
+    )
     ours = detail.get("full_suspend_reason") == suspend_reason(site)
     if admitted(site, roles):
-        if detail.get("suspended_till") and ours:
+        if suspended and ours:
             await api(site, "PUT", f"/admin/users/{user_id}/unsuspend")
-    elif not detail.get("suspended_till"):
+    elif not suspended:
         await api(
             site,
             "PUT",

@@ -39,7 +39,9 @@ os.environ |= {
     "ARCHON_CLIENT_SECRET": secrets.token_hex(16),
 }
 
+# Only now: importing the bridge reads the environment set above.
 import bridge
+import bridge.sweep
 
 
 class Archon:
@@ -126,10 +128,11 @@ def serve(app, port: int) -> None:
 
 
 @pytest.fixture(scope="session")
-def archon():
+async def archon():
     stand_in = Archon()
     serve(stand_in.app, 8766)
     serve(bridge.app, 8765)
+    await bridge.sweep.sweep()  # as after a deploy: creates the role groups
     return stand_in
 
 

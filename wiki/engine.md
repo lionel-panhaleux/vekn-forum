@@ -47,7 +47,7 @@ runs the archon PKCE flow with `profile:email`, reads `country` from archon's pu
   the **role groups**, one per archon role named in lower case (`ic`, `nc`, `prince`, `ethics`,
   `ptc`, `pt`, `rulemonger`, `judge`, `sheriff`, `dev`). Discourse validates group names as
   usernames, so every site sets `min_username_length` to 2; groups must exist before a payload
-  names them, or Discourse ignores them.
+  names them, or Discourse ignores them, so the sweep (below) creates any that is missing.
 
 The bridge owns exactly four things: `admin`; the role groups; **admission to the playtest site** —
 it refuses a playtest login without PT or PTC, and suspends there a member who loses both, lifting
@@ -58,15 +58,14 @@ it. Archon decides who may be in a language group, its owner decides which langu
 delegate through moderators and section groups, never by granting admin. The bridge sends only
 `add_groups`/`remove_groups` for the names it owns, never the full `groups` list.
 
-Who is admin where is per-site configuration: `NC@FR` on the French site, `IC` on the international
-one, `PTC` on the playtest one ([operations.md](operations.md#bridge)).
+The Coordinator row above is per-site configuration of the bridge ([operations.md](operations.md#bridge)).
 
 **Rights are re-pushed without a login.** A sweep (`vekn-bridge-sweep`, on a timer) reads every
 site's admins, role- and language-group members — every user, on the playtest site — takes their
 roles and country from archon's public API with the bridge's own `api:read` token, and pushes them
 through `sync_sso`, so a revoked NC loses admin without logging in again. The bridge keeps no
-refresh token. The sweep's burst of admin API calls needs `max_admin_api_reqs_per_minute` raised
-above Discourse's 60. The same archon login creates the user on any site on first visit, so one
+refresh token. Its burst of admin API calls needs Discourse's rate limit raised
+([operations.md](operations.md#deploy)). The same archon login creates the user on any site on first visit, so one
 user table per site stays invisible.
 
 **Claiming a legacy account.** Imported phpBB users keep their email, so a member whose archon

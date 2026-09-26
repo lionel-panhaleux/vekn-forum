@@ -1,11 +1,19 @@
 """wiki/engine.md#login, end to end: a site's login button to the member landing back on it."""
 
+import datetime
 import os
 import secrets
 
 from conftest import discourse_user, login, rails
 
 from bridge import discourse, sweep
+
+
+def suspended(user: dict) -> bool:
+    until = user.get("suspended_till")
+    return bool(until) and datetime.datetime.fromisoformat(until) > datetime.datetime.now(
+        datetime.UTC
+    )
 
 
 def handle() -> str:
@@ -89,13 +97,19 @@ async def test_the_playtest_site_admits_pt_and_ptc_only_and_suspends_on_loss(arc
     uid = archon.member(roles=["PT"])
     response = await login(browser, "playtest", handle())
     assert response.json()["current_user"]
+    # A moderator's past suspension, long expired, must not read as one.
+    user_id = (await discourse_user("playtest", uid))["id"]
+    rails(
+        "playtest",
+        f"User.find({user_id}).update!(suspended_at: 3.days.ago, suspended_till: 1.day.ago)",
+    )
     archon.members[uid]["roles"] = []
     await sweep.sweep()
-    assert (await discourse_user("playtest", uid)).get("suspended_till")
+    assert suspended(await discourse_user("playtest", uid))
     archon.members[uid]["roles"] = ["PTC"]
     await sweep.sweep()
     user = await discourse_user("playtest", uid)
-    assert not user.get("suspended_till") and user["admin"]
+    assert not suspended(user) and user["admin"]
 
 
 async def test_a_lost_role_removes_its_language_groups(archon, browser):

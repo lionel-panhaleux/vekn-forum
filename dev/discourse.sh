@@ -9,7 +9,6 @@ SRC=.local/discourse
 NAME=vekn-forum-discourse
 SITES="fr intl playtest"
 BRIDGE_URL=${BRIDGE_URL:-http://localhost:8765}
-ROLE_GROUPS="ic nc prince ethics ptc pt rulemonger judge sheriff dev"
 ENV_FILE=.local/discourse.env
 
 if [ ! -d "$SRC/.git" ]; then
@@ -61,7 +60,7 @@ for site in $SITES; do
     run "$NAME" sh -c "createdb discourse_$site 2>/dev/null || true" 
     run -e RAILS_DB="$site" "$NAME" bundle exec rake db:migrate > /dev/null
     secret=$(openssl rand -hex 16)
-    # Group names are validated as usernames: 3 characters minimum by default, and `ic`, `nc`,
+    # Group names (the bridge creates the role groups) are validated as usernames: 3 characters minimum by default, and `ic`, `nc`,
     # `pt` are two.
     key=$(run -e RAILS_DB="$site" "$NAME" bundle exec rails runner "
         SiteSetting.min_username_length = 2
@@ -74,7 +73,6 @@ for site in $SITES; do
           SiteSetting.login_required = true
           SiteSetting.allow_index_in_robots_txt = false
         end
-        '$ROLE_GROUPS'.split.each { |g| Group.find_or_create_by!(name: g) }
         ApiKey.where(description: 'bridge').destroy_all
         puts ApiKey.create!(description: 'bridge', created_by_id: Discourse::SYSTEM_USER_ID).key
     " | tail -1)

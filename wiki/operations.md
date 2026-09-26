@@ -11,7 +11,7 @@ Local dev, checks, CI and deploy.
 | `just typecheck` | ty, warnings as errors. |
 | `just test` | pytest; needs `just discourse` up. `just test -k playtest` runs one. |
 
-Every check must pass before a landing. Python 3.13 with uv, like the sibling VEKN services.
+Every check must pass before a landing.
 
 ## Local stack
 

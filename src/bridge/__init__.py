@@ -99,7 +99,6 @@ async def callback(request: Request, state: str = "", code: str = ""):
         ).fetchone()
         username = row[0] if row else None
         if not username:
-            # A legacy author is linked by email and keeps their name: nothing to ask.
             username = await discourse.username_for_email(login["site"], login["email"])
             if username:
                 await remember(conn, login["uid"], username)
@@ -141,7 +140,9 @@ async def finish(request: Request, username: str) -> RedirectResponse:
     site = login["site"]
     fields = await discourse.rights(site, login["uid"], login["roles"], login["country"])
     fields |= {"nonce": login["nonce"], "email": login["email"], "username": username}
-    if existing := await discourse.by_external_id(site, login["uid"]):
+    if discourse.env(site, "MEMBERS", "") and (
+        existing := await discourse.by_external_id(site, login["uid"])
+    ):
         await discourse.admit(site, await discourse.user(site, existing["id"]), login["roles"])
     query = urllib.parse.urlencode(discourse.encode(site, fields))
     return RedirectResponse(f"{login['return']}?{query}", 302)
