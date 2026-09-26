@@ -52,10 +52,20 @@ Designed at **393×852** first, then enhanced for desktop.
 ## Theming
 
 **One shared base theme plus per-site tokens.** *(Decided 2026-09-26.)* The base theme owns layout,
-components and interactions, maintained once. A site's identity is only its tokens: logo, palette
-(with its light/dark pair), accent, icon set, optionally a heading font. Components every site
-needs, such as VTES card display, belong to the base theme. A need a token cannot
-express is a change to the base theme, for every site.
+components and interactions, maintained once. A site's identity is only its tokens: title, logo and
+small mark, a palette pair (light and dark, the accent being the palette's `tertiary`), optionally a
+heading font from Discourse's list. Tokens are Discourse's own settings, not theme settings
+([engine.md](engine.md#model-mapping)); a site without its own wears the base palettes, archon's. Their one home is `discourse/sites/<site>/`: a coordinator's rare identity change is a change there, since the next provisioning rewrites an edit made in Discourse's admin.
+Components every site needs, such as VTES card display, belong to the base theme. A need a token
+cannot express is a change to the base theme, for every site.
+
+The base theme's one mark is a rule in the accent colour under the header. Text in an accent passes
+WCAG AA (4.5:1) against its palette's background: France's dark accent is a lighter red than its
+light one for that reason.
+
+**Card display.** `[[Card Name]]` in a post, English or translated, shows the card's scan — in the
+site's language when krcg has it — on hover where the device hovers, and on tap (dismissed by
+another) otherwise. A name krcg does not know stays as typed; code and links are left alone.
 
 ## Console
 
@@ -72,3 +82,5 @@ The home for every Discourse feature we switch off.
 | Feature | Why |
 |---|---|
 | Discourse chat | Not a chat platform ([product.md#deliberately-not](product.md#deliberately-not)). |
+| "Powered by Discourse" footer | Serves no persona job. |
+| Choosing another theme | Consistency across sites; the base theme is the only selectable one. |

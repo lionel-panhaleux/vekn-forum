@@ -28,3 +28,48 @@ ApiKey.find_or_create_by!(description: "bridge", key_hash: hash) do |k|
   k.truncated_key = key[0..3]
   k.created_by_id = Discourse::SYSTEM_USER_ID
 end
+SiteSetting.enable_powered_by_discourse = false
+
+# The base theme (wiki/design.md#theming), re-imported from its directory on every run; found by
+# name, since the import creates a new theme when not handed one.
+theme = Theme.find_by(name: "VEKN", component: false)
+theme = RemoteTheme.import_theme_from_directory(ENV.fetch("SITE_THEME_DIR"), theme_id: theme&.id)
+theme.set_default!
+Theme.where.not(id: theme.id).where(user_selectable: true).find_each { |t| t.update!(user_selectable: false) }
+
+# The site's tokens. Its palettes are not the theme's own: a re-import deletes the theme's palettes
+# its about.json does not list.
+light, dark = theme.color_schemes.find_by(name: "VEKN"), theme.color_schemes.find_by(name: "VEKN Dark")
+if (dir = ENV["SITE_IDENTITY_DIR"])
+  identity = JSON.parse(File.read(File.join(dir, "identity.json")))
+  SiteSetting.title = identity["title"]
+  SiteSetting.heading_font = identity["heading_font"] if identity["heading_font"]
+  changed = false
+  light, dark =
+    { "" => "light", " Dark" => "dark" }.map do |suffix, mode|
+      scheme = ColorScheme.find_or_create_by!(name: "#{identity["title"]}#{suffix}", theme_id: nil)
+      identity["palettes"][mode].each do |name, hex|
+        color = scheme.color_scheme_colors.find_or_initialize_by(name: name)
+        next if color.hex == hex
+        color.update!(hex: hex)
+        changed = true
+      end
+      scheme
+    end
+  # A palette's own save bumps its stylesheet only for themes using it as their light palette, and
+  # a web process keeps serving the old colours otherwise.
+  if changed
+    [light, dark].each(&:save!)
+    ColorScheme.publish_discourse_stylesheets!
+  end
+  %w[logo logo_small large_icon].each do |setting|
+    # UploadCreator optimizes the image beside its source: hand it a copy in a writable place.
+    Tempfile.create([setting, ".png"]) do |file|
+      IO.copy_stream(File.join(dir, "#{setting}.png"), file)
+      file.rewind
+      upload = UploadCreator.new(file, "#{setting}.png").create_for(Discourse::SYSTEM_USER_ID)
+      SiteSetting.set(setting, upload)
+    end
+  end
+end
+theme.update!(color_scheme: light, dark_color_scheme: dark)

@@ -1,0 +1,52 @@
+// Layout only: every colour is the site's palette, every font its settings (wiki/design.md#theming).
+
+// The accent rule under the header is the one mark all sites share; its colour is each site's.
+.d-header {
+  border-bottom: 3px solid var(--tertiary);
+  box-shadow: none;
+}
+
+.vekn-card {
+  color: var(--tertiary);
+  border-bottom: 1px dotted currentColor;
+  cursor: zoom-in;
+}
+
+.vekn-card-overlay {
+  position: fixed;
+  z-index: z("modal", "overlay");
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+
+  &.--left {
+    right: auto;
+    left: 1rem;
+  }
+
+  img {
+    display: block;
+    width: min(20rem, 80vw);
+    max-height: 85dvh;
+    object-fit: contain;
+    border-radius: 4.5% / 3.2%;
+    box-shadow: var(--shadow-dropdown);
+  }
+
+  &.--pinned {
+    inset: 0;
+    transform: none;
+    display: grid;
+    place-items: center;
+    background: rgb(0 0 0 / 0.6);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+    pointer-events: auto;
+    cursor: zoom-out;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+}

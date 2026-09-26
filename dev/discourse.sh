@@ -57,6 +57,9 @@ DISCOURSE_PLAYTEST_MEMBERS=PT,PTC
 DATABASE_URL=postgresql://bridge:bridge@127.0.0.1:5434/bridge
 EOF
 docker cp discourse/site.rb "$NAME":/tmp/site.rb
+docker exec "$NAME" rm -rf /tmp/vekn-theme /tmp/vekn-sites
+docker cp theme "$NAME":/tmp/vekn-theme
+docker cp discourse/sites "$NAME":/tmp/vekn-sites
 for site in $SITES; do
     run "$NAME" sh -c "createdb discourse_$site 2>/dev/null || true"
     run -e RAILS_DB="$site" "$NAME" bundle exec rake db:migrate > /dev/null
@@ -64,13 +67,16 @@ for site in $SITES; do
     key=$(openssl rand -hex 32)
     gated=""
     [ "$site" = playtest ] && gated="-e SITE_GATED=1"
+    identity=""
+    [ -d "discourse/sites/$site" ] && identity="-e SITE_IDENTITY_DIR=/tmp/vekn-sites/$site"
     run -e RAILS_DB="$site" \
         -e SITE_URL="http://$site.localhost:3000" \
         -e SITE_LOCALE="$([ "$site" = fr ] && echo fr || echo en)" \
         -e SITE_CONNECT_URL="$BRIDGE_URL/discourse/$site" \
         -e SITE_CONNECT_SECRET="$secret" \
         -e SITE_API_KEY="$key" \
-        $gated \
+        -e SITE_THEME_DIR=/tmp/vekn-theme \
+        $gated $identity \
         "$NAME" bundle exec rails runner /tmp/site.rb
     upper=$(echo "$site" | tr '[:lower:]' '[:upper:]')
     {
@@ -80,7 +86,10 @@ for site in $SITES; do
     } >> "$ENV_FILE"
 done
 
-# The bridge only needs Rails: no Ember build, no Sidekiq.
+# No Sidekiq. The frontend bundler is only for looking at the sites; the bridge needs Rails alone.
+if ! run "$NAME" pgrep -f rolldown > /dev/null; then
+    run -d "$NAME" sh -c 'bin/dev --only ember > /tmp/ember.log 2>&1'
+fi
 if ! curl -sf -o /dev/null -H 'Host: fr.localhost' http://127.0.0.1:3000/srv/status; then
     run -d "$NAME" bundle exec rails server -b 0.0.0.0 -p 3000
     until curl -sf -o /dev/null -H 'Host: fr.localhost' http://127.0.0.1:3000/srv/status; do sleep 2; done

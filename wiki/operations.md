@@ -20,11 +20,12 @@ Every check must pass before a landing.
 `dev/discourse.sh` runs Discourse's own `discourse/discourse_dev` image (native arm64) as the
 container `vekn-forum-discourse`, from a checkout at `.local/discourse`, as a
 multisite of three sites — `fr.localhost`, `intl.localhost`, `playtest.localhost`, port 3000 —
-plus the bridge's Postgres (`vekn-forum-discourse-db`, port 5434). Only the Rails server runs: no
-Ember build, so HTML pages answer 503 while every redirect and JSON endpoint the bridge uses
-works. It provisions each site for the bridge with `discourse/site.rb` — the settings of
-[engine.md#login](engine.md#login) and the bridge's API key, the same script production runs — and
-writes the bridge's environment to `.local/discourse.env`. The Discourse commit it checks out is
+plus the bridge's Postgres (`vekn-forum-discourse-db`, port 5434). The Rails server and the
+frontend bundler run (its log: `/tmp/ember.log` in the container), no Sidekiq. It provisions each
+site with `discourse/site.rb` — the settings of [engine.md#login](engine.md#login), the base theme
+from `theme/`, the site's tokens from `discourse/sites/<site>/` when it has some, and the bridge's
+API key, the same script production runs — and writes the bridge's environment to
+`.local/discourse.env`. Rerun it after changing the theme or a site's tokens. The Discourse commit it checks out is
 `discourse/ref`, production's too.
 `.local/` is gitignored; deleting it and both containers resets everything.
 
@@ -80,9 +81,10 @@ behind the host's nginx, which terminates TLS
 exempts the host's own address from the per-IP limits — counted across every site together — and
 leaves out the launcher's nginx rate limit, which has no exemption. It sends mail through Gmail
 SMTP as `codex.of.the.damned@gmail.com`, and makes
-`DISCOURSE_DEVELOPER_EMAILS` admin: the break-glass login at `/u/admin-login`. Each site's settings
-come from `discourse/site.rb`, re-run whenever it or the site's values change, or the database is
-new: its marker lives in `shared/data`.
+`DISCOURSE_DEVELOPER_EMAILS` admin: the break-glass login at `/u/admin-login`. Each site's settings, theme
+and tokens come from `discourse/site.rb`, re-run whenever it, the site's values, `theme/` or the
+site's `discourse/sites/<site>/` change, or the database is new: its marker lives in `shared/data`.
+The deploy syncs `theme/` and `discourse/sites/` to `shared/web-only`.
 
 **The bridge** runs as `vekn-forum-bridge` (uvicorn on `127.0.0.1:8030`, user `vekn_forum`, database
 `vekn_forum` on the host cluster by peer auth), its environment in `/etc/vekn_forum/bridge.env`.

@@ -55,3 +55,14 @@ start the sweep again.
 It worked when the login lands on the bridge's "Membership suspended" page, the member shows as
 suspended on both sites (Admin → Users → Suspended) with reason `archon: banned by the VEKN` after
 the first sweep, and is unsuspended on both after the second.
+
+## The fr site wears France's identity, and shows cards
+
+Gated by the commit "Theme every site from a shared base, and dress fr in France's tokens". In a
+browser, open `https://fr.forum.krcg.org` in light and dark system mode, then post
+`[[Anson]] et [[Diriger les indécis]]` in a test topic.
+
+It worked when the header is black with the V:EKN wordmark over a red rule, the tab shows the red
+V, dark mode keeps a red (not pink) accent, and hovering each name shows its scan — the second in
+French; on a phone, a tap shows it and another dismisses it. `https://intl.forum.krcg.org` wears
+the base palettes.

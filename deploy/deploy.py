@@ -195,7 +195,16 @@ server.shell(
     _if=lambda: data.did_change() and not swap.did_change(),
 )
 
-# --- Sites: settings and the bridge's API key, from discourse/site.rb
+# --- Sites: settings, the base theme, the site's identity and the bridge's API key, from site.rb
+
+
+def tree(path: Path) -> list[bytes]:
+    return [
+        bytes(f.relative_to(path)) + b"\0" + f.read_bytes()
+        for f in sorted(path.rglob("*"))
+        if f.is_file()
+    ]
+
 
 site_rb = (REPO / "discourse/site.rb").read_bytes()
 files.put(
@@ -203,6 +212,14 @@ files.put(
     src=str(REPO / "discourse/site.rb"),
     dest=f"{WEB}/vekn-forum-site.rb",
 )
+files.sync(name="Base theme", src=str(REPO / "theme"), dest=f"{WEB}/vekn-forum-theme", delete=True)
+files.sync(
+    name="Site identities",
+    src=str(REPO / "discourse/sites"),
+    dest=f"{WEB}/vekn-forum-sites",
+    delete=True,
+)
+theme = tree(REPO / "theme")
 provisioned = []
 for site, s in SITES.items():
     env = {
@@ -213,14 +230,18 @@ for site, s in SITES.items():
         "SITE_CONNECT_SECRET": secrets[f"{site}_connect_secret"],
         "SITE_API_KEY": secrets[f"{site}_api_key"],
         "SITE_EMAIL": MAIL,
+        "SITE_THEME_DIR": "/shared/vekn-forum-theme",
     }
+    identity = REPO / "discourse/sites" / site
+    if identity.is_dir():
+        env["SITE_IDENTITY_DIR"] = f"/shared/vekn-forum-sites/{site}"
     # docker's --env-file takes quotes literally
     content = "".join(f"{key}={value}\n" for key, value in env.items())
     site_env = f"{ETC}/site-{site}.env"
     put_secret(f"{site} site env", content, site_env)
     # A marker, not the upload's did_change: a run that uploaded then failed must not look finished.
     # It lives beside the database it describes, and goes with it.
-    expected = digest(site_rb, content.encode())
+    expected = digest(site_rb, content.encode(), *theme, *tree(identity))
     done = f"{DATA}/vekn-forum-site-{site}.provisioned"
     if marker(done) != expected:
         provisioned.append(

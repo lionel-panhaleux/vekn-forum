@@ -18,9 +18,19 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Section lead | Owner of the section group, and in the category's moderating group — both set by the coordinator. Owning a group needs no admin. |
 | Judges | A section of the international site, moderated by Rulemongers; its language groups are created by an IC. |
 | Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
-| Base theme, card display | One remote git theme with its components, installed on every site and updated from git. |
-| Community identity | That theme's settings on each site: the tokens of [design.md#theming](design.md#theming). |
+| Base theme, card display | One theme, `theme/` in this repo, card display included, imported from its directory into every site by site provisioning and made its default. |
+| Community identity | Discourse settings on each site, from `discourse/sites/<site>/`: title, logo, small mark, heading font, and a light/dark palette pair — the tokens of [design.md#theming](design.md#theming). |
 | Legacy phpBB author | User from the phpBB3 importer, email kept; claimed as below. |
+
+**The base theme is installed from its directory, not from git.** *(Decided 2026-09-27.)* Discourse's
+git import takes a whole repository, with no subdirectory: a remote git theme would need a
+repository of its own, splitting what changes together. Site provisioning re-imports it on every
+run, so a deploy is its update. A site's palettes are palettes of their own, not the theme's: a
+re-import deletes the theme palettes its `about.json` no longer lists.
+
+**Card display resolves names through krcg's API** (`api.krcg.org/card/<name>`), in the browser
+when a post is shown: Discourse cooks nothing for it, so emails, search and excerpts show the raw
+`[[Card Name]]`.
 
 ## Login
 

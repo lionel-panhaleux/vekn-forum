@@ -1,0 +1,36 @@
+{
+  "name": "VEKN",
+  "about_url": "https://github.com/lionel-panhaleux/vekn-forum",
+  "license_url": "https://github.com/lionel-panhaleux/vekn-forum/blob/main/LICENSE",
+  "component": false,
+  "color_schemes": {
+    "VEKN": {
+      "primary": "2A2520",
+      "secondary": "F5F0E6",
+      "tertiary": "A40F2D",
+      "quaternary": "5E5444",
+      "header_background": "1C1A1E",
+      "header_primary": "FAF8F4",
+      "highlight": "F9CCD4",
+      "selected": "FCE4E8",
+      "hover": "E8E6E4",
+      "danger": "6B21A8",
+      "success": "1E40AF",
+      "love": "C41235"
+    },
+    "VEKN Dark": {
+      "primary": "E8E3DC",
+      "secondary": "1C1A1E",
+      "tertiary": "EC6B84",
+      "quaternary": "B8B2AC",
+      "header_background": "141215",
+      "header_primary": "FAF8F4",
+      "highlight": "6E0A1F",
+      "selected": "3D2228",
+      "hover": "2E2A2D",
+      "danger": "C084FC",
+      "success": "60A5FA",
+      "love": "F4A3B3"
+    }
+  }
+}

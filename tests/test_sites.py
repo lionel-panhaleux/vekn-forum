@@ -1,0 +1,35 @@
+"""Site provisioning (discourse/site.rb): the base theme and each site's tokens, wiki/design.md#theming."""
+
+import json
+import os
+import pathlib
+
+import httpx
+
+REPO = pathlib.Path(__file__).parent.parent
+
+
+def palettes(site: str) -> list[dict[str, str]]:
+    info = httpx.get(f"{os.environ[f'DISCOURSE_{site.upper()}_URL']}/site.json").json()
+    assert [(t["name"], t["default"]) for t in info["user_themes"]] == [("VEKN", True)]
+    return [
+        {c["name"]: c["hex"].upper() for c in info[f"default_{mode}_color_scheme"]["colors"]}
+        for mode in ("light", "dark")
+    ]
+
+
+def test_a_site_with_an_identity_wears_its_tokens():
+    identity = json.loads((REPO / "discourse/sites/fr/identity.json").read_text())
+    light, dark = palettes("fr")
+    assert light == identity["palettes"]["light"]
+    assert dark == identity["palettes"]["dark"]
+    basic = httpx.get(f"{os.environ['DISCOURSE_FR_URL']}/site/basic-info.json").json()
+    assert basic["title"] == identity["title"]
+    assert basic["logo_url"] and basic["logo_small_url"]
+
+
+def test_a_site_without_one_wears_the_base_palettes():
+    schemes = json.loads((REPO / "theme/about.json").read_text())["color_schemes"]
+    light, dark = palettes("intl")
+    assert light.items() >= schemes["VEKN"].items()
+    assert dark.items() >= schemes["VEKN Dark"].items()
