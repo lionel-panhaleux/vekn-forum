@@ -34,9 +34,10 @@ to get a sane result is a default we failed to choose.
 ## Time-savers land first
 
 **A recurring NC or Prince job is at most two taps from the console** ([below](#nc-console)) once
-the console exists, and never needs Discourse's admin panel. One act that does three things (post,
-mail, chat push) beats three screens that each do one well. Prefill everything the platform already knows — archon's
-tournament, the playgroup's venue, the community's lists — rather than asking. A wizard fronts a
+the console exists, and never needs Discourse's admin panel. One act that does three things
+(post, mail, chat push) beats three screens that each do one well. Prefill everything the platform
+already knows — archon's tournament, the playgroup's venue, the community's lists — rather than
+asking. A wizard fronts a
 form, it never replaces one.
 
 ## Mobile first
@@ -69,4 +70,4 @@ The home for every Discourse feature we switch off.
 
 | Feature | Why |
 |---|---|
-| Discourse chat | Chat lives in WhatsApp, Telegram and Discord. |
+| Discourse chat | Not a chat platform ([product.md#deliberately-not](product.md#deliberately-not)). |

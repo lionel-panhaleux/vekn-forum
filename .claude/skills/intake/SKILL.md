@@ -10,7 +10,7 @@ far cheaper than evicting one later.
 
 Read `wiki/index.md` and `BOARD.md` first. Then, for each incoming item, answer four questions out
 loud, briefly. For anything a user sees, apply questions 1–3 of the gate in
-`.claude/skills/product/SKILL.md` too — an item serving no persona job is refused here.
+`.claude/skills/product/SKILL.md`.
 
 ## 1. Conflict
 
