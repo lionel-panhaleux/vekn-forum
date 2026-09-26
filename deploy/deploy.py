@@ -51,6 +51,10 @@ for name in [BASE, *map(domain, SITES)]:
         raise RuntimeError(f"{name} resolves to {ip}, not {host.data.ssh_hostname}")
 
 secrets = load(str(HERE / "secrets.sops.yaml"))
+if "archon_client_secret" not in secrets:
+    raise RuntimeError(
+        "no archon client in `just secrets` yet: register it first (wiki/operations.md#deploy)"
+    )
 
 
 def render(template: str, **values) -> str:
@@ -90,7 +94,6 @@ if len(postgres_units) != 1:
 postgres_unit = postgres_units[0]
 
 
-# the bridge's user owns its config, the per-site files beside it included
 server.group(name="Bridge group", group=NAME, system=True)
 server.user(
     name="Bridge user",
@@ -250,7 +253,12 @@ code = [
 expected = digest(
     *(
         path.read_bytes()
-        for path in [*(REPO / f for f in sources), *sorted((REPO / "src").rglob("*.py"))]
+        for path in [
+            *(REPO / f for f in sources),
+            *sorted(
+                p for p in (REPO / "src").rglob("*") if p.is_file() and "__pycache__" not in p.parts
+            ),
+        ]
     )
 )
 if marker(f"{OPT}/.venv/.deployed") != expected:

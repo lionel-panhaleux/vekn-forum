@@ -18,7 +18,7 @@ Every check must pass before a landing.
 ## Local stack
 
 `dev/discourse.sh` runs Discourse's own `discourse/discourse_dev` image (native arm64) as the
-container `vekn-forum-discourse`, from a checkout pinned in the script at `.local/discourse`, as a
+container `vekn-forum-discourse`, from a checkout at `.local/discourse`, as a
 multisite of three sites — `fr.localhost`, `intl.localhost`, `playtest.localhost`, port 3000 —
 plus the bridge's Postgres (`vekn-forum-discourse-db`, port 5434). Only the Rails server runs: no
 Ember build, so HTML pages answer 503 while every redirect and JSON endpoint the bridge uses
@@ -86,9 +86,9 @@ writes its own daily archive — database and uploads — under
 `/var/discourse/shared/standalone/backups/<db>/`, and `vekn-forum-discourse-backup.timer` pushes
 that directory to the fleet's restic bucket, repo `vekn_forum_discourse`. To restore one site:
 `restic restore` the archive, drop it in that directory, then
-`cd /var/discourse && ./launcher enter app` and `RAILS_DB=<db> discourse restore <file>`.
+`cd /var/discourse && ./launcher enter app` and `discourse enable_restore`, then `RAILS_DB=<db> discourse restore <file>`.
 
 **Secrets** (`just secrets`): `bridge_secret`, `mail_password`, per site `<site>_connect_secret` and
 `<site>_api_key` (the deploy gives both to the site and to the bridge), and
-`archon_client_id`/`archon_client_secret` — the one archon client of the Bridge table, registered on
+`archon_client_id`/`archon_client_secret`, added once registered — the one archon client of the Bridge table, registered on
 archon production with `https://forum.krcg.org/callback`.
