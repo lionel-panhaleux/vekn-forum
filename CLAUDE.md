@@ -47,7 +47,8 @@ than a third.
 
 ## Commands
 
-None yet. Checks, dev setup and deploy live in [`wiki/operations.md`](wiki/operations.md).
+`just discourse` (local stack), `just test`, `just lint`, `just typecheck`. Details, dev setup and
+deploy live in [`wiki/operations.md`](wiki/operations.md).
 
 ## Commits
 

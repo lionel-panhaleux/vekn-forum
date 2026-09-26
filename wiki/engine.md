@@ -24,32 +24,50 @@ alternative a future agent will be tempted to redo — the identity requirement 
 
 ## Login
 
-**DiscourseConnect** behind our own small bridge service; with it on, Discourse disables every
-other login (local, email link, OAuth) except `/u/admin-login` for admins. The bridge runs the
-archon PKCE flow, reads `country` from archon's public API, and signs each site a payload:
+**DiscourseConnect** behind our own small bridge service (`src/bridge/`); with it on, Discourse
+disables every other login (local, email link, OAuth) except `/u/admin-login` for admins. The bridge
+runs the archon PKCE flow with `profile:email`, reads `country` from archon's public API
+(`/v1/users/{uid}`, since userinfo has none), and signs each site a payload:
 
-- `external_id` = archon uid; `email` = the **verified** address from archon's `email` scope
-  ([archon.md](archon.md) — pending, see the board). The bridge passes it through and stores none.
+- `external_id` = archon uid; `email` = the **verified** address from archon's `profile:email`
+  scope ([archon.md](archon.md)). The bridge passes it through and stores none. Every site sets
+  `auth_overrides_email` (the address is rewritten from archon on each login) and therefore
+  `email_editable` off, which Discourse requires for it: a member changes their email in archon.
 - **Never `require_activation`, never an unverified email.** Discourse links a new `external_id` to
   an existing user by email only without it — that match *is* the legacy claim. With it, the match
   is skipped and a legacy address fails as a duplicate; an unverified email without it would hand
   a stranger the legacy account. A member with no verified email in archon is sent to archon to add
   one.
 - `username` = a **suggestion** only, the member's preferred handle, asked once on first login and
-  the one thing the bridge stores. `auth_overrides_username` stays off: each site owns its
-  usernames, a claimed account keeps its phpBB name, and a collision gets a numeric suffix the
-  member can rename.
-- `admin` and the **role groups** (one per archon role, e.g. `nc`, `prince`, `judge`).
+  the one thing the bridge stores. A member whose email already matches an account on the site
+  they log into (a legacy author) is not asked: that account's name becomes their stored handle.
+  `auth_overrides_username` stays off: each site owns its usernames, a claimed account keeps its
+  phpBB name, and a collision gets a numeric suffix the member can rename.
+- `admin`, sent `true` or `false` on every payload — Discourse applies it only when present — and
+  the **role groups**, one per archon role named in lower case (`ic`, `nc`, `prince`, `ethics`,
+  `ptc`, `pt`, `rulemonger`, `judge`, `sheriff`, `dev`). Discourse validates group names as
+  usernames, so every site sets `min_username_length` to 2; groups must exist before a payload
+  names them, or Discourse ignores them.
 
 The bridge owns exactly four things: `admin`; the role groups; **admission to the playtest site** —
-it refuses a playtest payload without PT or PTC, and suspends there a member who loses both; and
-**removal from language groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
+it refuses a playtest login without PT or PTC, and suspends there a member who loses both, lifting
+only a suspension carrying its own reason once one is regained; and **removal from language
+groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
 Rulemonger; it finds them through the Discourse API by that prefix, so a language group must carry
 it. Archon decides who may be in a language group, its owner decides which language. Coordinators
 delegate through moderators and section groups, never by granting admin. The bridge sends only
-`add_groups`/`remove_groups` for the names it owns, never the full `groups` list. Rights are re-pushed through `sync_sso`, not only at login, so a revoked NC loses admin
-without logging in again. The same archon login creates the user on any site on first visit, so
-one user table per site stays invisible.
+`add_groups`/`remove_groups` for the names it owns, never the full `groups` list.
+
+Who is admin where is per-site configuration: `NC@FR` on the French site, `IC` on the international
+one, `PTC` on the playtest one ([operations.md](operations.md#bridge)).
+
+**Rights are re-pushed without a login.** A sweep (`vekn-bridge-sweep`, on a timer) reads every
+site's admins, role- and language-group members — every user, on the playtest site — takes their
+roles and country from archon's public API with the bridge's own `api:read` token, and pushes them
+through `sync_sso`, so a revoked NC loses admin without logging in again. The bridge keeps no
+refresh token. The sweep's burst of admin API calls needs `max_admin_api_reqs_per_minute` raised
+above Discourse's 60. The same archon login creates the user on any site on first visit, so one
+user table per site stays invisible.
 
 **Claiming a legacy account.** Imported phpBB users keep their email, so a member whose archon
 email matches is linked on first login — posts and username included, nothing to click. The email

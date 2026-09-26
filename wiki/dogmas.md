@@ -42,8 +42,10 @@ Never factor on resemblance.
 justified only by a subtle non-local constraint invisible at the point of reading. No narration, no
 changelogs, **no TODOs** — discovered work goes through ingress or gets done now.
 
-**Framework idioms as they come** — the engine's own, once chosen; ours for glue code in the engine's
-language. Configuration read from the environment at point of use, never a settings object.
+**Framework idioms as they come** — the engine's own inside its extension points (Ruby and Ember
+for Discourse plugins and theme components); a service we run ourselves, such as the login bridge,
+is Python 3.13 with FastAPI and uv, like the sibling VEKN services, because `server-setup` deploys
+nothing else. Configuration read from the environment at point of use, never a settings object.
 
 ## Testing
 
@@ -56,8 +58,10 @@ refactors.
 - A test is the executable slice of this wiki: each must trace to a declared behaviour. One that maps
   to no wiki claim is evicted.
 - **Mocks are banned by default** — a mock that mirrors the code tests the code against itself. Use
-  real dependencies (a real engine instance, a real Postgres, archon beta, temp files) or don't test
-  that path.
+  real dependencies (a real engine instance, a real Postgres, temp files) or don't test that path.
+  archon is the exception: tests run against a local stand-in server that speaks its documented
+  contract ([archon.md](archon.md)) over HTTP, as rulings-website does, since archon beta cannot be
+  scripted into role changes; beta itself is proven after deploy ([post-deploy.md](post-deploy.md)).
 - Exception: property-style tests for genuinely hazardous invariants (parsing, concurrency) — the
   same spots KISS flags.
 - **Weakening or deleting a test is an egress rejection** unless the wiki-declared behaviour changed.
