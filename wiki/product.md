@@ -31,7 +31,8 @@ silos ([community.md](community.md)). Members log in with their archon account
   to a community's Discord and Telegram, configured by the NC; WhatsApp is a link only (no usable
   group API). *(Decided 2026-09-26.)*
 - **Mailing lists and newsletters run on Listmonk**, self-hosted beside Discourse, its subscribers
-  fed by the login bridge from archon-verified emails. Discourse's own mail (notifications, digests)
+  fed by the login bridge from archon-verified emails. Beyond communities, it serves **role lists**
+  synced from archon: judges for Rulemongers, playtesters by language for PTCs. Discourse's own mail (notifications, digests)
   stays on. *(Decided 2026-09-26.)*
 
 ## Rollout
