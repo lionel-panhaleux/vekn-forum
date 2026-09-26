@@ -11,6 +11,8 @@ Plans, findings and reasoning journeys do not live here — they die with their 
 - [design.md](design.md) — the design brief: less is more, time-savers first, mobile first, theming
   by tokens, the console, the cut list.
 - [operations.md](operations.md) — local dev, checks, CI and deploy.
+- [post-deploy.md](post-deploy.md) — checks parked until a deploy is live; the board line is already
+  gone.
 
 ## Dogmas
 

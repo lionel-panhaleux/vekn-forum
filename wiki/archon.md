@@ -3,7 +3,8 @@
 The VEKN membership and tournament system, and our only identity provider — see
 [dogmas.md#data](dogmas.md#data) for what we may copy from it.
 Source for every claim below: the archon-vibe wiki (`vtes-biased/archon-vibe`, `wiki/access.md`,
-`wiki/public-api.md`, `wiki/discord.md`, `wiki/vekn.md`), read 2026-09-26, and the working client in
+`wiki/public-api.md`, `wiki/discord.md`, `wiki/vekn.md`), read 2026-09-26 (`profile:email` as of
+`4ca6cdf6`), and the working client in
 `vtes-biased/rulings-website` (`wiki/auth.md`).
 
 ## Hosts
@@ -17,20 +18,27 @@ Plain OAuth2 (RFC 6749) with **PKCE S256 required**. **Not OIDC**: no id_token, 
 no JWKS. Off-the-shelf "OIDC login" plugins do not apply; a generic OAuth2 client pointed at
 `userinfo` does.
 
-- Entry: send the browser to `<ARCHON>/consent?response_type=code&client_id=…&redirect_uri=…&scope=profile:read&state=…&code_challenge=…&code_challenge_method=S256`.
+- Entry: send the browser to `<ARCHON>/consent?response_type=code&client_id=…&redirect_uri=…&scope=profile:email&state=…&code_challenge=…&code_challenge_method=S256`.
   Not to `/oauth/authorize`, which answers JSON `{redirect_url}`, never a 302.
 - `/oauth/token` (form or JSON body), `/oauth/revoke` (RFC 7009 — kills the whole rotation lineage),
   `/oauth/userinfo`.
 - Confidential clients: secret plus PKCE verifier; exact `redirect_uri` match. Registered by an IC or
-  DEV on archon's Developer page; the secret is shown once.
+  DEV on archon's Developer page, with the scopes it may ask for; the secret is shown once.
 - Tokens: EdDSA JWTs, 1 h access, 30 d refresh, **rotating** — replaying a spent refresh token revokes
   the chain. Two concurrent refreshes with one token log the user out everywhere.
-- Scopes: `profile:read` reaches `/oauth/*` only. `api:read` is the `client_credentials` daemon grant
-  (1 h JWT, no refresh) for the public API.
+- Scopes: `profile:read` reaches `/oauth/*` only. `profile:email` is the same plus the member's email
+  (below); registering it requires a statement of what the client does with the address, which the
+  consent page shows. `event:run` acts on one tournament and implies no email. `api:read` is the
+  `client_credentials` daemon grant (1 h JWT, no refresh) for the public API.
 
 ## What a login tells us
 
-`/oauth/userinfo` → `{sub, roles, vekn_id, capabilities}`. **No name, no email, no country.**
+`/oauth/userinfo` → `{sub, roles, vekn_id, capabilities}`, plus `email` under `profile:email`.
+**No name, no country.**
+
+- `email` is **verified**: the member's email login once confirmed by link, else the address Discord
+  reported as verified. Never the self-edited address of record; absent when there is neither, so a
+  member can log in with no email to link on.
 
 - `sub` is the archon uid — the stable key. `vekn_id` may be absent (unsponsored member).
 - The user's `country` (ISO alpha-2) comes from public API `GET /v1/users/{uid}`, which accepts the

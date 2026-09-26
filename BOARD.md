@@ -15,7 +15,6 @@ Ties break to the smaller line. An item waiting on someone is not a state: it is
 follow-up ("chase @lip, 12 Sep"), owned by whoever wrote it.
 
 ---
-- archon `profile:email` on beta — landed in archon-vibe (`4ca6cdf6`); after `just deploy-beta` there, run its post-deploy check "Check the `profile:email` grant on beta": archon beta `/oauth/userinfo` returns the verified address, never the address of record, under `profile:email` with the forum's purpose shown on consent. Blocks the bridge. Doc-impact: archon.md.
 - Login bridge, proven locally — a two-site local Discourse (fr + international) and the bridge against archon beta: a beta login creates the user; an imported user with the same email is linked, not duplicated; an NC gets admin on their own site only; revoking the role in archon drops admin through `sync_sso` without a login; an active Ethics Ban in archon suspends the user on every site and lifting it unsuspends (needs archon to expose ban status to the bridge). Doc-impact: engine.md, operations.md (bridge stack and checks), dogmas.md (framework idioms).
 - France phpBB import — obtain a phpBB database dump from the vekn.fr administrators (chase, 3 Oct) and import it into the local fr site: topic and post counts match phpBB, legacy `viewtopic.php` URLs redirect. Doc-impact: engine.md, operations.md.
 - Base theme and France identity — the shared base theme (remote git) with a component turning `[[Card Name]]` into a card image on hover (images from krcg), installed on the local sites; fr tokens set on the fr site. Doc-impact: design.md, engine.md.
@@ -25,4 +24,4 @@ follow-up ("chase @lip, 12 Sep"), owned by whoever wrote it.
 - Production host — ask Lionel before renting or touching DNS: a dedicated Docker host runs the fr and international sites on platform subdomains, with backups. Doc-impact: operations.md.
 - Listmonk — self-hosted per server-setup; every list mirrors a Discourse group, kept in sync by the bridge; a coordinator or section lead manages only their groups' lists. Doc-impact: product.md, engine.md, operations.md.
 
-<!-- cycles-since-upkeep: 0 -->
+<!-- cycles-since-upkeep: 1 -->

@@ -38,7 +38,9 @@ One unit of work is **one landing**, all three parts together:
    the work changed a standing decision, the decision line changes here, with one line of rationale
    only when the rejected alternative is attractive enough that someone would plausibly redo it.
 3. **Board** — delete the line. Delete its `board/<slug>.md` too, unless another line still points at
-   it. Completion is deletion; there is no done section.
+   it. Completion is deletion; there is no done section. Whatever only a deploy can prove goes to
+   `wiki/post-deploy.md` (or the deploying repo's own page) in the same landing, naming the gating
+   commit — it never keeps the line open. When the human says a deploy is live, run what it gates.
 
 Then commit to `main` (trunk-based, no feature branch). Describe the change itself; `Fixes #N` only
 for a real GitHub issue.
