@@ -13,8 +13,6 @@ logger = logging.getLogger("bridge.sweep")
 #: leaving room for logins, which spend the same budget.
 PACE = 0.15
 
-Lookup = Callable[[str], Awaitable[dict]]
-
 
 async def sweep() -> None:
     """Every user is tried: one failure must not hold up everyone else's revocation."""
@@ -44,8 +42,13 @@ async def sweep() -> None:
                 failed = True
                 logger.exception("%s: user %s failed", site, user_id)
     # A ban can fall on anyone who ever logged in, not only on those the sites list above.
-    async with await db() as conn:
-        rows = await (await conn.execute("SELECT archon_uid FROM usernames")).fetchall()
+    try:
+        async with await db() as conn:
+            rows = await (await conn.execute("SELECT archon_uid FROM usernames")).fetchall()
+    except Exception:
+        failed = True
+        logger.exception("members: failed")
+        rows = []
     for (uid,) in rows:
         try:
             if not archon.banned(await lookup(uid)):
@@ -60,7 +63,7 @@ async def sweep() -> None:
         raise SystemExit(1)
 
 
-async def push(site: str, user_id: int, lookup: Lookup) -> None:
+async def push(site: str, user_id: int, lookup: Callable[[str], Awaitable[dict]]) -> None:
     detail = await discourse.user(site, user_id)
     record = detail.get("single_sign_on_record")
     if not record:

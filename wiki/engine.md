@@ -80,8 +80,8 @@ site's admins, suspended users, role- and language-group members — every user,
 — and every member who ever logged in (the `usernames` table), for bans; it takes their
 roles and country from archon's public API with the bridge's own `api:read` token, and pushes them
 through `sync_sso`, so a revoked NC loses admin without logging in again. It looks each member up
-once per run, paced under archon's per-client lookup budget, which logins share — about 24 000
-members who ever logged in before a run outlasts the hourly timer. The bridge keeps no
+once per run, paced under archon's per-client lookup budget, which logins share, so a run lasts at
+least the pace times the members who ever logged in and must stay under the timer's period. The bridge keeps no
 refresh token. Its burst of admin API calls needs Discourse's rate limit raised
 ([operations.md](operations.md#deploy)). The same archon login creates the user on any site on first visit, so one
 user table per site stays invisible.

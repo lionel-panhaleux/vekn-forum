@@ -1,4 +1,5 @@
-"""archon OAuth2 client — wiki/archon.md. PKCE login, userinfo, and the public API for country."""
+"""archon OAuth2 client — wiki/archon.md. PKCE login, userinfo, and the public API for country
+and sanctions."""
 
 import base64
 import hashlib
@@ -64,7 +65,8 @@ async def exchange_code(code: str, verifier: str) -> str:
 
 
 async def daemon_token() -> str:
-    """`api:read` client_credentials: reads members' roles and country without their login."""
+    """`api:read` client_credentials: reads members' roles, country and sanctions — the only token
+    archon tells sanctions to."""
     data = await _request(
         "POST",
         f"{app_url()}/oauth/token",
@@ -96,8 +98,7 @@ async def member(uid: str, token: str) -> dict:
 
 
 def banned(member: dict) -> bool:
-    """An Ethics ban: a suspension with no end. Timed suspensions and probations are archon's
-    tournament matters and do not reach the forums (wiki/engine.md#login)."""
+    """An Ethics ban: a suspension with no end (wiki/product.md#scope)."""
     return any(
         s["level"] == "suspension" and s["expires_at"] is None for s in member.get("sanctions", [])
     )
