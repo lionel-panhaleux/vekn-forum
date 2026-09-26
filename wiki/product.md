@@ -20,10 +20,22 @@ silos ([community.md](community.md)). Members log in with their archon account
 - **phpBB archives are imported**: boards, topics and posts under their legacy authors. A legacy
   account is claimable — linked to an archon login once confirmed. *(Decided 2026-09-26.)*
 
+- **Public read, archon posts.** Anyone can read and search engines index; any archon account may
+  post, VEKN ID or not, so newcomers can ask. A site may gate private categories (association board,
+  organizers) by group. *(Decided 2026-09-26.)*
+- **Tournaments come from archon.** Each upcoming archon tournament is mirrored as a topic in its
+  country's tournaments category and kept current from archon; discussion and reports live in that
+  thread. *(Decided 2026-09-26.)*
+- **Chat apps get pushes and links.** Discourse's chat-integration plugin pushes chosen categories
+  to a community's Discord and Telegram, configured by the NC; WhatsApp is a link only (no usable
+  group API). *(Decided 2026-09-26.)*
+- **Mailing lists and newsletters run on Listmonk**, self-hosted beside Discourse, its subscribers
+  fed from the emails the login bridge holds. Discourse's own mail (notifications, digests) stays on.
+  *(Decided 2026-09-26.)*
+
 ## Deliberately not
 
-- **Not a chat platform.** Chat groups live in WhatsApp, Telegram and Discord; the platform links to
-  and at most integrates with them. *(Decided 2026-09-26.)*
-- **Not a mail server.** Mailing lists go through a third-party tool that is open-source, free or
-  self-hosted. *(Decided 2026-09-26.)*
+- **Not a chat platform.** Chat groups live in WhatsApp, Telegram and Discord; Discourse's built-in
+  chat stays off. *(Decided 2026-09-26.)*
+- **Not a mail server.** Outgoing mail goes through an SMTP relay.
 - **Not a source of identity or roles.** Those are archon's.
