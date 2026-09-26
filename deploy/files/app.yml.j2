@@ -3,7 +3,6 @@ templates:
   - "templates/postgres.template.yml"
   - "templates/redis.template.yml"
   - "templates/web.template.yml"
-  - "templates/web.ratelimited.template.yml"
   # host nginx terminates TLS and proxies to /shared/nginx.http.sock: no published port, which
   # Docker would open past UFW
   - "templates/web.socketed.template.yml"
@@ -25,8 +24,11 @@ env:
   DISCOURSE_SMTP_USER_NAME: "{{ mail }}"
   DISCOURSE_SMTP_PASSWORD: "{{ mail_password }}"
   DISCOURSE_SMTP_ENABLE_START_TLS: true
-  # the bridge's sweep reads and writes every member through the admin API
+  # the bridge's sweep reads and writes every member through the admin API, from this host's own
+  # address: exempt from the per-IP limits, which count every site of the multisite together. The
+  # launcher's nginx rate limit (web.ratelimited) has no exemption, so it is left out.
   DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE: 6000
+  DISCOURSE_MAX_REQS_PER_IP_EXCEPTIONS: "{{ host_ip }}"
 
 volumes:
   - volume:

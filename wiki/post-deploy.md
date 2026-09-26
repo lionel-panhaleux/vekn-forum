@@ -31,9 +31,9 @@ It worked when the consent page names the forum's email purpose, both logins lan
 `current_user`, that user is admin on fr and not on intl (the site's Admin → Users), and the sweep
 finishes without an archon error — its daemon token accepted by archon's public API.
 
-## The production host serves, hides its container and backs up
+## The production host serves and backs up
 
-Gated by the same commit. On frankfurt: `sudo ss -ltnp` shows no port held by `docker-proxy`;
+Gated by the same commit. On frankfurt:
 `https://fr.forum.krcg.org` and `https://intl.forum.krcg.org` render their site, in French and
 English; `/u/admin-login` on either mails a login link to the developer email. The morning after the
 first deploy, `ls /var/discourse/shared/standalone/backups/*/` lists one archive per site, and

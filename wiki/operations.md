@@ -71,8 +71,10 @@ limit.
 Redis. `containers/app.yml` is written by the deploy; a change to it runs `./launcher rebuild app`,
 which takes every site down for minutes. The container publishes no port: its nginx listens on
 `/var/discourse/shared/standalone/nginx.http.sock`, behind the host's nginx, which terminates TLS
-(server-setup's `nginx_site`). It raises `DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE` for the sweep,
-sends mail through Gmail SMTP as `codex.of.the.damned@gmail.com`, and makes
+(server-setup's `nginx_site`). For the sweep, it raises `DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE`,
+exempts the host's own address from the per-IP limits — counted across every site together — and
+leaves out the launcher's nginx rate limit, which has no exemption. It sends mail through Gmail
+SMTP as `codex.of.the.damned@gmail.com`, and makes
 `DISCOURSE_DEVELOPER_EMAILS` admin: the break-glass login at `/u/admin-login`. Each site's settings
 come from `discourse/site.rb`, re-run whenever it or the site's values change.
 

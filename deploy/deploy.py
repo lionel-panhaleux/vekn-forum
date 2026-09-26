@@ -132,6 +132,7 @@ app_yml = put_secret(
     render(
         "app.yml.j2",
         ref=REF,
+        host_ip=host.data.ssh_hostname,
         default_domain=domain(DEFAULT),
         developer_emails=DEVELOPER_EMAILS,
         mail=MAIL,
