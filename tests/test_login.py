@@ -146,3 +146,11 @@ async def test_a_lost_role_removes_its_language_groups(archon, browser):
     archon.members[uid]["roles"] = []
     await sweep.sweep()
     assert group not in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
+
+
+async def test_the_bridge_root_links_every_site(browser):
+    response = await browser.get("http://localhost:8765/", headers={"accept-language": "fr"})
+    assert response.status_code == 200
+    assert "Forums VEKN" in response.text
+    for site in discourse.sites():
+        assert f'href="{os.environ[f"DISCOURSE_{site.upper()}_URL"]}"' in response.text

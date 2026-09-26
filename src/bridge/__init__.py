@@ -33,6 +33,7 @@ TEXT = {
         "username_label": "Shown on your posts, on every VEKN forum.",
         "username_rule": "2 to 20 letters, digits, dots, dashes or underscores.",
         "continue": "Continue",
+        "forums": "VEKN forums",
     },
     "fr": {
         "expired": "Connexion expirée",
@@ -49,6 +50,7 @@ TEXT = {
         "username_label": "Affiché sur vos messages, sur tous les forums VEKN.",
         "username_rule": "De 2 à 20 lettres, chiffres, points, tirets ou tirets bas.",
         "continue": "Continuer",
+        "forums": "Forums VEKN",
     },
 }
 
@@ -84,6 +86,17 @@ app.add_middleware(
     max_age=3600,
     https_only=os.environ["BRIDGE_URL"].startswith("https://"),
 )
+
+
+@app.get("/")
+async def directory(request: Request):
+    """The platform's own address leads to every site."""
+    lang = language(request) or "en"
+    links = "".join(
+        f'<a class="button" href="{html.escape(url)}">{html.escape(urllib.parse.urlsplit(url).hostname or url)}</a>'
+        for url in (discourse.env(site, "URL") for site in discourse.sites())
+    )
+    return page(lang, TEXT[lang]["forums"], links)
 
 
 @app.get("/discourse/{site}")

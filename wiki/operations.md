@@ -58,7 +58,7 @@ box shared with archon beta, deployed by `just deploy` (pyinfra, `deploy/`) with
 
 | name | serves |
 |---|---|
-| `forum.krcg.org` | the bridge |
+| `forum.krcg.org` | the bridge, whose root links every site |
 | `intl.forum.krcg.org` | the international site: the launcher's default site, database `discourse`, `RAILS_DB=default` |
 | `fr.forum.krcg.org` | the France site: database `discourse_fr`, `RAILS_DB=fr` |
 

@@ -64,6 +64,9 @@ it. Archon decides who may be in a language group, its owner decides which langu
 delegate through moderators and section groups, never by granting admin. The bridge sends only
 `add_groups`/`remove_groups` for the names it owns, never the full `groups` list.
 
+The bridge's own root lists every site, in the browser's language, so the platform address leads
+somewhere.
+
 The Coordinator row above is per-site configuration of the bridge ([operations.md](operations.md#bridge)).
 
 **Rights are re-pushed without a login.** A sweep (`vekn-bridge-sweep`, on a timer) reads every
