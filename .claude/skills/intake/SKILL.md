@@ -29,7 +29,7 @@ returns 404", "`count(*)` is 0")?
 - No done-condition → **it is not a line, it is documentation.** Put it on the right wiki page and
   say which. "Keep an eye on X" is always this.
 - Waiting on a person is not a state — write it as a dated follow-up ("chase @lip, 12 Sep").
-- The done-condition is what review and a commit can prove. Proof that needs a deploy — archon beta,
+- The done-condition is what review and a commit can prove. Proof that needs a deploy — archon,
   a live site — is a post-deploy check `/ship` parks on `wiki/post-deploy.md`; name it in the line,
   but it never keeps the line open.
 

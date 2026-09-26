@@ -51,6 +51,18 @@ async def test_a_french_browser_gets_french_pages_and_a_french_account(archon, b
     assert rails("intl", f"puts User.find({user_id}).locale").splitlines()[-1] == "fr"
 
 
+async def test_a_browser_in_neither_language_keeps_the_site_default(archon, browser):
+    uid = archon.member()
+    response = await login(browser, "fr", lang="de-DE,de;q=0.9")
+    assert '<html lang="en">' in response.text
+    await browser.post(str(response.url), data={"username": handle()})
+    user_id = (await discourse_user("fr", uid))["id"]
+    assert rails("fr", f"puts User.find({user_id}).locale.inspect").splitlines()[-1] in (
+        "nil",
+        '""',
+    )
+
+
 async def test_a_legacy_account_with_the_same_email_is_claimed_not_duplicated(archon, browser):
     uid = archon.member()
     old = handle()
