@@ -32,6 +32,7 @@ OPT = f"/opt/{NAME}"
 ETC = f"/etc/{NAME}"
 BRIDGE_PORT = 8030
 BRIDGE_URL = f"https://{BASE}"
+ARCHON_URL, ARCHON_API_URL = "https://archon.krcg.org", "https://api.archon.krcg.org"  # beta
 BACKUP_REPO = f"{NAME}_discourse"
 UV = "/usr/local/bin/uv"
 
@@ -280,6 +281,8 @@ bridge_env = {
     "BRIDGE_URL": BRIDGE_URL,
     "BRIDGE_SECRET": secrets["bridge_secret"],
     "DATABASE_URL": f"postgresql:///{NAME}?host=/var/run/postgresql",
+    "ARCHON_URL": ARCHON_URL,
+    "ARCHON_API_URL": ARCHON_API_URL,
     "ARCHON_CLIENT_ID": secrets["archon_client_id"],
     "ARCHON_CLIENT_SECRET": secrets["archon_client_secret"],
     "DISCOURSE_SITES": " ".join(SITES),

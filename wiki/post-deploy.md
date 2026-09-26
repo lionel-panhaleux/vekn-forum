@@ -17,10 +17,9 @@ archon's are on `vtes-biased/archon-vibe` `wiki/post-deploy.md`.
 ## Log in through archon and sweep against it
 
 Gated by the commit that first deploys production ("Deploy the fr and international sites and the
-bridge to frankfurt"), and on archon's side by the release carrying `profile:email` reaching
-production. The local tests prove the bridge against a stand-in; this proves the same contract
-against archon production (`archon.vekn.net`, public API `api.archon.vekn.net`). It needs the
-vekn-forum client registered there by an IC or DEV from Developer with `profile:email` **and**
+bridge to frankfurt"). The local tests prove the bridge against a stand-in; this proves the same
+contract against the archon the deploy names (beta for now: `archon.krcg.org`, public API
+`api.archon.krcg.org`). It needs the vekn-forum client registered there by an IC or DEV from Developer with `profile:email` **and**
 `api:read` checked (one client serves both the login and the sweep), its purpose stated, and
 `https://forum.krcg.org/callback` as redirect URI; its id and secret go in `just secrets`.
 
@@ -30,7 +29,7 @@ member holding NC with country FR, then the same path on `intl.forum.krcg.org`; 
 
 It worked when the consent page names the forum's email purpose, both logins land on a JSON
 `current_user`, that user is admin on fr and not on intl (the site's Admin → Users), and the sweep
-finishes without an archon error — its daemon token accepted by `api.archon.vekn.net`.
+finishes without an archon error — its daemon token accepted by archon's public API.
 
 ## The production host serves, hides its container and backs up
 

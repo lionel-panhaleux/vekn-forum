@@ -90,5 +90,9 @@ that directory to the fleet's restic bucket, repo `vekn_forum_discourse`. To res
 
 **Secrets** (`just secrets`): `bridge_secret`, `mail_password`, per site `<site>_connect_secret` and
 `<site>_api_key` (the deploy gives both to the site and to the bridge), and
-`archon_client_id`/`archon_client_secret`, added once registered — the one archon client of the Bridge table, registered on
-archon production with `https://forum.krcg.org/callback`.
+`archon_client_id`/`archon_client_secret` — the one archon client of the Bridge table, with
+`https://forum.krcg.org/callback` as redirect URI.
+
+**Production logs in through archon beta** (`archon.krcg.org`, API `api.archon.krcg.org`), set in
+`deploy.py`, until archon production carries `profile:email`: its client is registered on beta.
+*(Decided 2026-09-26: open the forum now rather than wait on an archon production release.)*
