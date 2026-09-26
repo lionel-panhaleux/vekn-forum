@@ -43,11 +43,11 @@ light, dark = theme.color_schemes.find_by(name: "VEKN"), theme.color_schemes.fin
 if (dir = ENV["SITE_IDENTITY_DIR"])
   identity = JSON.parse(File.read(File.join(dir, "identity.json")))
   SiteSetting.title = identity["title"]
-  SiteSetting.heading_font = identity["heading_font"] if identity["heading_font"]
+  SiteSetting.heading_font = identity["heading_font"] || SiteSetting.defaults[:heading_font]
   changed = false
   light, dark =
     { "" => "light", " Dark" => "dark" }.map do |suffix, mode|
-      scheme = ColorScheme.find_or_create_by!(name: "#{identity["title"]}#{suffix}", theme_id: nil)
+      scheme = ColorScheme.find_or_create_by!(name: "#{ENV.fetch("RAILS_DB")}#{suffix}", theme_id: nil)
       identity["palettes"][mode].each do |name, hex|
         color = scheme.color_scheme_colors.find_or_initialize_by(name: name)
         next if color.hex == hex
