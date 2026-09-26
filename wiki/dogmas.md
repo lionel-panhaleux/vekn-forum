@@ -2,8 +2,8 @@
 
 Paradigms chosen by the human. Ingress challenges an incoming ask against this page; egress checks
 the landed change against it. Overturning one is valid work; violating one silently is not.
-Sections marked *inherited* are carried over from the sibling VEKN repos (rulings-website, krcg-bot)
-on 2026-09-26 and stand until the human overturns them.
+Code, Testing, Commits and Human inflexion points are carried over from the sibling VEKN repos
+(rulings-website, krcg-bot) on 2026-09-26 and stand until the human overturns them.
 
 ## Data
 
@@ -19,7 +19,7 @@ public extension points (Discourse plugins, theme components, DiscourseConnect).
 Discourse core is a rejection. Our own code is the glue only: the login bridge, theme components,
 import tooling, deploy. *(2026-09-26.)*
 
-## Code *(inherited)*
+## Code
 
 **Tight, local, KISS.** No patterns, abstractions or indirection for elegance's sake — they must earn
 their keep. Don't write for a human reader's comfort; keep it terse for agentic workers.
@@ -43,9 +43,9 @@ justified only by a subtle non-local constraint invisible at the point of readin
 changelogs, **no TODOs** — discovered work goes through ingress or gets done now.
 
 **Framework idioms as they come** — the engine's own, once chosen; ours for glue code in the engine's
-language. `os.getenv` at point of use rather than a settings object.
+language. Configuration read from the environment at point of use, never a settings object.
 
-## Testing *(inherited)*
+## Testing
 
 **Few tests, high coverage of behaviour.** Test what the product does at its boundaries — the API,
 the CLI, end-to-end nominal paths and the failure modes that matter — never how it does it. Agents
@@ -68,7 +68,7 @@ refactors.
 Prefer what the engine already offers, then a few lines, then a dependency. krcg is the exception in
 the other direction: anything about cards belongs upstream in krcg, not reimplemented here.
 
-## Commits and branches *(inherited)*
+## Commits and branches
 
 **Trunk-based**: commit straight to `main`, fast-forward, no feature branches. Two or three agents
 may work parallel board lines on `main` — each claims its line, stays aware of siblings, keeps to its
@@ -80,6 +80,7 @@ fixes a known GitHub issue, close it with a `Fixes #N` line just above the trail
 ## Human inflexion points
 
 Interrupt the human only for: a dogma or paradigm choice (short option set plus a recommendation), an
-irreversible or outward-facing action, a genuine change to product scope, or an egress deadlock after
+irreversible or outward-facing action, a genuine change to product scope, accepting, reordering or
+dropping a board line, or an egress deadlock after
 two rounds. Everything else proceeds. HitL effort goes into the harness, not the code — the ratchet
 turns a correction into a standing rule.

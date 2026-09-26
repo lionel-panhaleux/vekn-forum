@@ -1,7 +1,7 @@
 # archon
 
-The VEKN membership and tournament system, and our only identity provider. Identity, roles and
-country are archon's facts; we copy one only where the copy is rewritten from archon on read.
+The VEKN membership and tournament system, and our only identity provider — see
+[dogmas.md#data](dogmas.md#data) for what we may copy from it.
 Source for every claim below: the archon-vibe wiki (`vtes-biased/archon-vibe`, `wiki/access.md`,
 `wiki/public-api.md`, `wiki/discord.md`, `wiki/vekn.md`), read 2026-09-26, and the working client in
 `vtes-biased/rulings-website` (`wiki/auth.md`).

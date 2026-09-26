@@ -7,5 +7,6 @@ hand and named in the line.
 
 **Two deploy shapes.** Discourse runs from its official Docker launcher (multisite) on a dedicated
 host — the one exception to the `server-setup` pattern, forced by the engine ([engine.md](engine.md)).
-Everything we write (the login bridge) follows `server-setup`: pyinfra, systemd, nginx, the shared
+Everything we write (the login bridge) follows
+[`server-setup`](https://github.com/lionel-panhaleux/server-setup): pyinfra, systemd, nginx, the shared
 Postgres cluster.

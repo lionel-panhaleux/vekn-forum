@@ -48,5 +48,4 @@ None yet. Checks, dev setup and deploy live in [`wiki/operations.md`](wiki/opera
 
 ## Commits
 
-Trunk-based: straight to `main`, fast-forward, no feature branches. Describe the change itself. A
-`Fixes #N` line above the trailers only for a real **GitHub** issue.
+Trunk-based, straight to `main` — see [`wiki/dogmas.md#commits-and-branches`](wiki/dogmas.md#commits-and-branches).

@@ -11,7 +11,7 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Ours | Discourse |
 |---|---|
 | Community space (France, Germany, …) | One **site** of the multisite: own database, theme, locale, settings, admins, domain. |
-| Cross-community space (international) | Its own site. |
+| Cross-community space (international) | Its own site; IC members are its admins. |
 | NC | `admin` on the site of their archon `country`. |
 | Section / playgroup | A category (subcategories for cities under a region). |
 | Prince leading a section | Member of the section's moderating group; the NC assigns it on their site. |
@@ -24,15 +24,18 @@ archon is plain OAuth2 with PKCE and gives no email or name ([archon.md](archon.
 Discourse login plugin handles whole. So login goes through **DiscourseConnect** backed by our own
 small bridge service: it runs the archon PKCE flow, reads `country` from archon's public API, holds
 the one fact archon lacks — the member's email — and hands each site a signed payload with
-`external_id` = archon uid, `admin` and group membership derived from archon roles. The same archon
+`external_id` = archon uid, `admin` and membership of the **role groups** (one per archon role,
+e.g. `nc`, `prince`, `judge`). The bridge owns those groups and nothing else: it only sends
+`add_groups`/`remove_groups` for them, never the full `groups` list, so the section groups an NC
+assigns on their site are never touched. Username and email are asked once, on first login, and
+held by the bridge. The same archon
 login creates the user on any site on first visit, so one user table per site stays invisible.
 Roles are re-pushed by the bridge, not only at login, so a revoked NC loses admin without logging
 in again.
 
 ## Accepted costs
 
-- Docker is mandatory for Discourse; it runs on its own host outside the pyinfra/systemd pattern
-  ([operations.md](operations.md)).
+- Docker is mandatory for Discourse ([operations.md](operations.md) holds the hosting).
 - The Discourse team does not support self-hosted multisite configuration; all sites share plugins
   and upgrade together.
 

@@ -12,8 +12,8 @@ silos ([community.md](community.md)). Members log in with their archon account
   English) live on the same platform. *(Decided 2026-09-26.)*
 - **NCs administer their space**: they configure its identity, sections and moderators without being
   platform admins. Princes lead playgroup sections inside it (a city, a shop's regular play, a bar
-  night). archon scopes roles by country only, so the platform owns sections and the Prince →
-  section assignment.
+  night). The platform owns sections and the Prince → section assignment, since archon roles have no
+  scope below the country ([archon.md#roles](archon.md#roles)).
 - **Adopt an existing open-source forum engine** rather than building one. It must support external
   OAuth, have a genuinely good interface, allow CSS theming and some JS (VTES card display, icons),
   and be self-hosted: **Discourse multisite**, one site per community ([engine.md](engine.md)).
