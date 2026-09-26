@@ -25,7 +25,8 @@ abstraction, do it inside this task. Only genuinely separable discoveries go bac
 Never leave the board longer than you found it, minus the line you completed.
 
 Hold to `wiki/dogmas.md` while you write: tight and local, no TODOs, comments only for traps,
-mocks banned, tests at the boundary.
+mocks banned, tests at the boundary. A user-facing change also holds to `wiki/design.md` and passes
+the `/product` gate, 393 px screenshot included, before it lands.
 
 ## 3. Land the trinity
 

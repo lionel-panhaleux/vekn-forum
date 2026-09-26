@@ -38,6 +38,10 @@ then the whole modules the diff sits in, not just the hunks.
 7. **Test suspicion.** A weakened or deleted test is a rejection unless the wiki-declared behaviour
    changed — name the claim that moved. A new test that mocks our own code, or that asserts internals
    rather than a boundary, is a rejection: `wiki/dogmas.md` bans both.
+8. **Noise and reach** (user-facing changes). Against `wiki/design.md`: an element serving no job in
+   `wiki/product.md#personas`, anything duplicated on the same screen, a recurring NC/Prince job
+   left more than two taps from the console, a re-enabled feature from `design.md#cut` — each is
+   blocking. A missing 393 px screenshot of the changed surface is blocking.
 
 ## Output
 

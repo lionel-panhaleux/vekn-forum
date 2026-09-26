@@ -9,7 +9,8 @@ No work reaches the board unchallenged. Ingress **proposes**; the human accepts.
 far cheaper than evicting one later.
 
 Read `wiki/index.md` and `BOARD.md` first. Then, for each incoming item, answer four questions out
-loud, briefly:
+loud, briefly. For anything a user sees, apply the gate in `.claude/skills/product/SKILL.md` too —
+an item serving no persona job is refused here.
 
 ## 1. Conflict
 

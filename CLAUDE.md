@@ -37,6 +37,9 @@ Context lives in the wiki, asks live on the board. Never the other way round.
   substantive changes land here.
 - **`/upkeep`** — maintenance, every 20 shipped lines or monthly: wiki lint, board eviction, harness
   ratchet.
+- **`/product`** — the product lens, a fourth skill by the human's choice (2026-09-26): `scout` for
+  NC/Prince time-savers, `audit` for keep/cut/merge at phone width, and the gate `/intake` and
+  `/ship` apply to anything a user sees.
 
 Egress review is by a fresh-context agent that has not seen the implementation conversation. Its
 findings are **blocking** or **advisory**; after two rejection rounds, escalate to the human rather

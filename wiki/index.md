@@ -8,6 +8,8 @@ Plans, findings and reasoning journeys do not live here — they die with their 
 - [product.md](product.md) — scope and capabilities; what the platform does and deliberately does not.
 - [engine.md](engine.md) — Discourse multisite: why, how our model maps onto it, the archon login
   bridge.
+- [design.md](design.md) — the design brief: less is more, time-savers first, mobile first, theming
+  by tokens, the NC console, the cut list.
 - [operations.md](operations.md) — local dev, checks, CI and deploy.
 
 ## Dogmas

@@ -4,6 +4,22 @@ A shared, modern forum platform for VEKN national communities, replacing the per
 silos ([community.md](community.md)). Members log in with their archon account
 ([archon.md](archon.md)); archon roles decide who runs what.
 
+## Personas
+
+Recurring jobs, most frequent first. The NC console serves exactly these
+([design.md#nc-console](design.md#nc-console)); a user-facing change that serves none of them is
+cut at ingress. *(Proposed 2026-09-26; sharpened by `/product scout`.)*
+
+- **NC** — announce to the whole community in one act (post, mail, chat push); open a playgroup
+  and appoint its Prince; welcome a newcomer and route them to the nearest playgroup; handle flags;
+  pin the national events; adjust the site's identity (rare).
+- **Prince** — announce the next play night or tournament to the playgroup (post plus chat push);
+  keep the playgroup's venue, schedule and chat links current; welcome newcomers; moderate the
+  section.
+- **Role-list sender** (PTC, Rulemonger) — mail their list: playtesters in a language, judges.
+- **Member** — find the nearest playgroup and its chat; see upcoming tournaments; ask a rules or
+  beginner question; trade; recover their old posts.
+
 ## Scope
 
 - **One deployment, one space per community.** Each national community gets its own space with its
