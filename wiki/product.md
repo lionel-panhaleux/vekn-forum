@@ -41,6 +41,12 @@ silos ([community.md](community.md)). Members log in with their archon account
 - **Anti-spam is archon's signup plus Discourse defaults** — trust levels and the flag review queue
   worked by the NC and moderators; no approval queue. *(Decided 2026-09-26.)*
 
+- **An archon Ban suspends everywhere.** A member under an active Ethics Ban sanction in archon is
+  suspended on every site; lifting it lifts the suspension. *(Decided 2026-09-26.)*
+- **GDPR.** Every site shows a privacy notice naming the controller (Lionel, while he runs it), what
+  is held and why; archon's consent screen for the `email` scope says what the forum does with the
+  address. *(Decided 2026-09-26.)*
+
 ## Rollout
 
 - **France pilots**: its import, legacy-account claiming and identity are proven at full scale on one
