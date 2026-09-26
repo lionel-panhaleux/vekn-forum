@@ -27,6 +27,9 @@ TEXT = {
         "no_email_body": "The forum links your account by the email archon has verified, and "
         "archon has none for you yet.",
         "open_archon": "Open archon",
+        "banned": "Membership suspended",
+        "banned_body": "Your VEKN membership is suspended, so the VEKN forums are closed to you "
+        "until it is lifted.",
         "gated": "Playtesters only",
         "gated_body": "This forum is open to archon's PT and PTC.",
         "username": "Choose your username",
@@ -44,6 +47,9 @@ TEXT = {
         "no_email_body": "Le forum relie votre compte par l’email qu’archon a vérifié, et archon "
         "n’en a encore aucun pour vous.",
         "open_archon": "Ouvrir archon",
+        "banned": "Adhésion suspendue",
+        "banned_body": "Votre adhésion à la VEKN est suspendue : les forums VEKN vous sont fermés "
+        "jusqu’à sa levée.",
         "gated": "Réservé aux playtesteurs",
         "gated_body": "Ce forum est ouvert aux PT et PTC d’archon.",
         "username": "Choisissez votre pseudo",
@@ -132,9 +138,17 @@ async def callback(request: Request, state: str = "", code: str = ""):
     try:
         token = await archon.exchange_code(code, login["verifier"])
         info = await archon.userinfo(token)
-        member = await archon.member(info["sub"], token)
+        # Only the daemon token is told a member's sanctions.
+        member = await archon.member(info["sub"], await archon.daemon_token())
     except archon.Error:
         return page(lang, t["down"], f"<p>{t['down_body']}</p>", 502)
+    if archon.banned(member):
+        site = login["site"]
+        if existing := await discourse.by_external_id(site, info["sub"]):
+            await discourse.standing(
+                site, await discourse.user(site, existing["id"]), info["roles"], True
+            )
+        return page(lang, t["banned"], f"<p>{t['banned_body']}</p>", 403)
     if not info.get("email"):
         profile = html.escape(archon.app_url() + "/profile")
         return page(
@@ -207,8 +221,11 @@ async def finish(request: Request, username: str) -> RedirectResponse:
     # Sets a new account's language only; a member's own later choice is kept.
     if lang := language(request):
         fields["locale"] = lang
-    if discourse.gate(site) and (existing := await discourse.by_external_id(site, login["uid"])):
-        await discourse.admit(site, await discourse.user(site, existing["id"]), login["roles"])
+    # A banned member was refused at the callback: here any ban suspension is stale.
+    if existing := await discourse.by_external_id(site, login["uid"]):
+        await discourse.standing(
+            site, await discourse.user(site, existing["id"]), login["roles"], False
+        )
     query = urllib.parse.urlencode(discourse.encode(site, fields))
     return RedirectResponse(f"{login['return']}?{query}", 302)
 

@@ -39,3 +39,19 @@ English; `/u/admin-login` on either mails a login link to the developer email. T
 first deploy, `ls /var/discourse/shared/web-only/backups/*/` lists one archive per site, and
 `sudo systemctl status vekn-forum-discourse-backup` shows a push to `vekn_forum_discourse`, with no
 orphan warning for it in `journalctl -t postgres-backup`.
+
+## A ban in archon suspends on every site
+
+Gated by the commit "Suspend a member archon bans on every site, and lift it with the ban", and
+by archon beta running v1.2.8 (`api.archon.krcg.org/openapi.json` names `sanctions`). The local tests
+prove it against a stand-in; this proves archon's `sanctions` shape and that it reaches the bridge's
+daemon token.
+
+On archon beta, as Ethics, give a test member holding a VEKN ID and accounts on fr and intl a
+suspension with no end date. In a private window, log in on `https://fr.forum.krcg.org` as that
+member; on frankfurt, `sudo systemctl start vekn-forum-sweep`. Then lift the sanction in archon and
+start the sweep again.
+
+It worked when the login lands on the bridge's "Membership suspended" page, the member shows as
+suspended on both sites (Admin → Users → Suspended) with reason `archon: banned by the VEKN` after
+the first sweep, and is unsuspended on both after the second.

@@ -84,14 +84,23 @@ async def userinfo(token: str) -> dict:
 
 
 async def member(uid: str, token: str) -> dict:
-    """`{roles, country, …}` from the public API; a member with no VEKN ID is absent from it,
-    and since every role requires one, absent means no roles and no country."""
+    """`{roles, country, …}` from the public API, plus `sanctions` to the daemon token only. A
+    member with no VEKN ID is absent from it, and since every role requires one, absent means no
+    roles, no country — and no ban the bridge can see."""
     try:
         return await _request("GET", f"{api_url()}/v1/users/{uid}", token=token)
     except Error as e:
         if e.status == 404:
             return {"roles": [], "country": None}
         raise
+
+
+def banned(member: dict) -> bool:
+    """An Ethics ban: a suspension with no end. Timed suspensions and probations are archon's
+    tournament matters and do not reach the forums (wiki/engine.md#login)."""
+    return any(
+        s["level"] == "suspension" and s["expires_at"] is None for s in member.get("sanctions", [])
+    )
 
 
 async def _request(method: str, url: str, token: str | None = None, **kwargs) -> dict:

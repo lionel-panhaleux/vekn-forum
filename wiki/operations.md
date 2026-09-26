@@ -39,7 +39,7 @@ Configuration is read from the environment at point of use.
 |---|---|
 | `BRIDGE_URL` | Its public origin; `<BRIDGE_URL>/callback` is the archon redirect URI. |
 | `BRIDGE_SECRET` | Signs the login session cookie. |
-| `DATABASE_URL` | Postgres holding the one table, `usernames`. |
+| `DATABASE_URL` | Postgres holding the one table, `usernames`; the sweep reads it too. |
 | `ARCHON_URL`, `ARCHON_API_URL` | archon's app and public API hosts; default to production (`archon.vekn.net`). |
 | `ARCHON_CLIENT_ID`, `ARCHON_CLIENT_SECRET` | One archon client, registered with `profile:email` and `api:read`. |
 | `DISCOURSE_SITES` | Space-separated site names, e.g. `fr intl playtest`. |

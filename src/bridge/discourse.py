@@ -80,9 +80,13 @@ async def rights(site: str, uid: str, roles: list[str], country: str | None) -> 
     }
 
 
-def suspend_reason(site: str) -> str:
-    """The bridge lifts only the suspensions it made, told apart by this exact reason."""
-    return f"archon: holds none of {env(site, 'MEMBERS')}"
+#: The bridge lifts only the suspensions it made, told apart by their exact reason: this one, or
+#: `gate_reason()`.
+BANNED = "archon: banned by the VEKN"
+
+
+def gate_reason(site: str) -> str:
+    return f"archon: holds none of {env(site, 'MEMBERS', '')}"
 
 
 async def api(site: str, method: str, path: str, **kwargs) -> dict:
@@ -117,9 +121,10 @@ async def groups(site: str, prefix: str) -> list[str]:
 
 
 async def user_ids(site: str) -> set[int]:
-    """Whoever the bridge may have to take rights from: admins, role and language group members,
-    and on a gated site every user, since admission itself can be lost."""
-    lists = ["active"] if gate(site) else ["admins"]
+    """Whoever the bridge may have to take rights from or give standing back to: admins, the
+    suspended, role and language group members, and on a gated site every user, since admission
+    itself can be lost."""
+    lists = ["active" if gate(site) else "admins", "suspended"]
     ids = set()
     for query in lists:
         page = 1
@@ -166,26 +171,27 @@ async def username_for_email(site: str, email: str) -> str | None:
     return found[0]["username"] if found else None
 
 
-async def admit(site: str, detail: dict, roles: list[str]) -> None:
-    """On a gated site, suspend a member who lost admission and lift what the bridge suspended
-    once it is regained. A suspension made by a moderator is never touched. `detail` is the
-    user as `user()` reads it."""
-    if not gate(site):
-        return
+async def standing(site: str, detail: dict, roles: list[str], banned: bool) -> None:
+    """Suspend a member archon bans, or who lost admission to a gated site, and lift what the
+    bridge suspended once neither holds. A ban outranks the gate: its reason is the one kept, so
+    regaining PT alone lifts nothing. A suspension made by a moderator is never touched. `detail`
+    is the user as `user()` reads it."""
+    want = BANNED if banned else None if admitted(site, roles) else gate_reason(site)
     user_id = detail["id"]
     until = detail.get("suspended_till")
     # An expired suspension keeps its date.
     suspended = bool(until) and datetime.datetime.fromisoformat(until) > datetime.datetime.now(
         datetime.UTC
     )
-    ours = detail.get("full_suspend_reason") == suspend_reason(site)
-    if admitted(site, roles):
-        if suspended and ours:
-            await api(site, "PUT", f"/admin/users/{user_id}/unsuspend")
-    elif not suspended:
+    reason = detail.get("full_suspend_reason")
+    if suspended and reason != want and reason in {BANNED, gate_reason(site)}:
+        # Discourse refuses to suspend the suspended, so a new reason needs a lift first.
+        await api(site, "PUT", f"/admin/users/{user_id}/unsuspend")
+        suspended = False
+    if want and not suspended:
         await api(
             site,
             "PUT",
             f"/admin/users/{user_id}/suspend",
-            data={"suspend_until": "3000-01-01", "reason": suspend_reason(site)},
+            data={"suspend_until": "3000-01-01", "reason": want},
         )

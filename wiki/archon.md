@@ -44,6 +44,11 @@ no JWKS. Off-the-shelf "OIDC login" plugins do not apply; a generic OAuth2 clien
 - The user's `country` (ISO alpha-2) comes from public API `GET /v1/users/{uid}`, which accepts the
   user's own token at any scope. Never a name: archon publishes VEKN IDs, never names, to third
   parties.
+- **Sanctions**: to a daemon (`api:read`) token only, never a member's, the same lookup adds
+  `sanctions: [{level, expires_at}]` — each `suspension` or `probation` not lifted, expired or
+  deleted; `expires_at` null is a ban. No reason, no issuer, no other level; no stream carries them.
+  A member with no VEKN ID has no row, so no sanctions either (archon-vibe `517981dc`, v1.2.8).
+- Lookups are throttled per client, daemon and member tokens alike: 600 a minute, burst 100.
 - NC and Prince contact emails are not exposed to the API.
 
 ## Roles

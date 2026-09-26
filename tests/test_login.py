@@ -20,6 +20,9 @@ def handle() -> str:
     return f"m{secrets.token_hex(4)}"
 
 
+BAN = {"level": "suspension", "expires_at": None}
+
+
 async def test_a_first_login_asks_a_username_once_and_creates_the_user(archon, browser):
     uid = archon.member()
     name = handle()
@@ -131,6 +134,41 @@ async def test_the_playtest_site_admits_pt_and_ptc_only_and_suspends_on_loss(arc
     await sweep.sweep()
     user = await discourse_user("playtest", uid)
     assert not suspended(user) and user["admin"]
+
+
+async def test_a_ban_suspends_everywhere_and_its_lifting_unsuspends(archon, browser):
+    uid = archon.member()
+    await login(browser, "fr", handle())
+    await login(browser, "intl")
+    archon.members[uid]["sanctions"] = [
+        {"level": "suspension", "expires_at": "2099-01-01T00:00:00Z"}
+    ]
+    assert (await login(browser, "fr")).json()["current_user"]  # a timed suspension is no ban
+    archon.members[uid]["sanctions"] = [BAN]
+    response = await login(browser, "fr")
+    assert response.status_code == 403 and "suspended" in response.text
+    assert suspended(await discourse_user("fr", uid))
+    assert not suspended(await discourse_user("intl", uid))
+    await sweep.sweep()
+    assert suspended(await discourse_user("intl", uid))
+    archon.members[uid]["sanctions"] = []
+    assert (await login(browser, "fr")).json()["current_user"]
+    await sweep.sweep()
+    assert not suspended(await discourse_user("intl", uid))
+
+
+async def test_a_ban_outranks_the_playtest_gate(archon, browser):
+    uid = archon.member(roles=["PT"])
+    await login(browser, "playtest", handle())
+    archon.members[uid]["roles"] = []
+    await sweep.sweep()
+    archon.members[uid] |= {"roles": ["PT"], "sanctions": [BAN]}
+    await sweep.sweep()
+    user = await discourse_user("playtest", uid)
+    assert suspended(user) and user["full_suspend_reason"] == discourse.BANNED
+    archon.members[uid]["sanctions"] = []
+    await sweep.sweep()
+    assert not suspended(await discourse_user("playtest", uid))
 
 
 async def test_a_lost_role_removes_its_language_groups(archon, browser):

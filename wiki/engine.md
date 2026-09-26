@@ -26,8 +26,9 @@ alternative a future agent will be tempted to redo — the identity requirement 
 
 **DiscourseConnect** behind our own small bridge service (`src/bridge/`); with it on, Discourse
 disables every other login (local, email link, OAuth) except `/u/admin-login` for admins. The bridge
-runs the archon PKCE flow with `profile:email`, reads `country` from archon's public API
-(`/v1/users/{uid}`, since userinfo has none), and signs each site a payload:
+runs the archon PKCE flow with `profile:email`, reads `country` and sanctions from archon's public
+API (`/v1/users/{uid}` with its own `api:read` token, since userinfo has neither and only that token
+is told sanctions), and signs each site a payload:
 
 - `external_id` = archon uid; `email` = the **verified** address from archon's `profile:email`
   scope ([archon.md](archon.md)). The bridge passes it through and stores none. Every site sets
@@ -55,12 +56,18 @@ runs the archon PKCE flow with `profile:email`, reads `country` from archon's pu
   usernames, so every site sets `min_username_length` to 2; groups must exist before a payload
   names them, or Discourse ignores them, so the sweep (below) creates any that is missing.
 
-The bridge owns exactly four things: `admin`; the role groups; **admission to the playtest site** —
-it refuses a playtest login without PT or PTC, and suspends there a member who loses both, lifting
-only a suspension carrying its own reason once one is regained; and **removal from language
-groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
+The bridge owns exactly five things: `admin`; the role groups; **admission to the playtest site** —
+it refuses a playtest login without PT or PTC, and suspends there a member who loses both; **the
+VEKN ban** — a member archon holds an Ethics ban against (a `suspension` with no end date) is
+refused at login and suspended on every site where they have an account, and lifting the ban in
+archon lifts it; and **removal from language groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
 Rulemonger; it finds them through the Discourse API by that prefix, so a language group must carry
-it. Archon decides who may be in a language group, its owner decides which language. Coordinators
+it. Archon decides who may be in a language group, its owner decides which language. The bridge lifts
+only suspensions carrying one of its own two reasons, a ban's outranking the gate's, so regaining PT
+while banned lifts nothing; a moderator's suspension is never touched. **Only a ban reaches the
+forums**: timed suspensions and probations are archon's tournament matters, and a member with no
+VEKN ID has no public API row, so a ban on them stays invisible to the bridge.
+*(Decided 2026-09-26.)* Coordinators
 delegate through moderators and section groups, never by granting admin. The bridge sends only
 `add_groups`/`remove_groups` for the names it owns, never the full `groups` list.
 
@@ -70,9 +77,11 @@ somewhere.
 The Coordinator row above is per-site configuration of the bridge ([operations.md](operations.md#bridge)).
 
 **Rights are re-pushed without a login.** A sweep (`vekn-bridge-sweep`, on a timer) reads every
-site's admins, role- and language-group members — every user, on the playtest site — takes their
+site's admins, suspended users, role- and language-group members — every user, on the playtest site
+— and every member who ever logged in (the `usernames` table), for bans; it takes their
 roles and country from archon's public API with the bridge's own `api:read` token, and pushes them
-through `sync_sso`, so a revoked NC loses admin without logging in again. The bridge keeps no
+through `sync_sso`, so a revoked NC loses admin without logging in again. It looks each member up
+once per run, paced under archon's per-client lookup budget, which logins share. The bridge keeps no
 refresh token. Its burst of admin API calls needs Discourse's rate limit raised
 ([operations.md](operations.md#deploy)). The same archon login creates the user on any site on first visit, so one
 user table per site stays invisible.

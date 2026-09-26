@@ -1,7 +1,8 @@
 """The bridge between the real local Discourse sites (`just discourse`) and a stand-in archon.
 
 The stand-in speaks archon's documented contract (wiki/archon.md) over HTTP — consent, PKCE token
-exchange, userinfo, `client_credentials`, `/v1/users/{uid}` — and nothing of the bridge's
+exchange, userinfo, `client_credentials`, `/v1/users/{uid}` with `sanctions` for the daemon token
+alone — and nothing of the bridge's
 internals. archon itself is proven after deploy (wiki/post-deploy.md).
 """
 
@@ -67,6 +68,7 @@ class Archon:
             "country": country,
             "email": email,
             "vekn_id": vekn_id,
+            "sanctions": [],
         }
         self.signed_in = uid
         return uid
@@ -113,11 +115,12 @@ class Archon:
         return info | {"capabilities": []}
 
     async def user(self, request: Request, uid: str):
-        self.bearer(request)
+        daemon = self.bearer(request) == ""
         m = self.members.get(uid)
         if not m or not m["vekn_id"]:
             raise HTTPException(404, "User not found")
-        return {"uid": uid, "vekn_id": m["vekn_id"], "country": m["country"], "roles": m["roles"]}
+        body = {"uid": uid, "vekn_id": m["vekn_id"], "country": m["country"], "roles": m["roles"]}
+        return body | ({"sanctions": m["sanctions"]} if daemon else {})
 
 
 def serve(app, port: int) -> None:
@@ -132,6 +135,9 @@ async def archon():
     stand_in = Archon()
     serve(stand_in.app, 8766)
     serve(bridge.app, 8765)
+    # The sweep looks up everyone who ever logged in: only this session's members.
+    async with await bridge.db() as conn:
+        await conn.execute("TRUNCATE usernames")
     await bridge.sweep.sweep()  # as after a deploy: creates the role groups
     return stand_in
 
