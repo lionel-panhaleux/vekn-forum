@@ -140,9 +140,7 @@ async def finish(request: Request, username: str) -> RedirectResponse:
     site = login["site"]
     fields = await discourse.rights(site, login["uid"], login["roles"], login["country"])
     fields |= {"nonce": login["nonce"], "email": login["email"], "username": username}
-    if discourse.env(site, "MEMBERS", "") and (
-        existing := await discourse.by_external_id(site, login["uid"])
-    ):
+    if discourse.gate(site) and (existing := await discourse.by_external_id(site, login["uid"])):
         await discourse.admit(site, await discourse.user(site, existing["id"]), login["roles"])
     query = urllib.parse.urlencode(discourse.encode(site, fields))
     return RedirectResponse(f"{login['return']}?{query}", 302)

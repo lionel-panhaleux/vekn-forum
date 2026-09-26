@@ -21,7 +21,7 @@ multisite of three sites — `fr.localhost`, `intl.localhost`, `playtest.localho
 plus the bridge's Postgres (`vekn-forum-discourse-db`, port 5434). Only the Rails server runs: no
 Ember build, so HTML pages answer 503 while every redirect and JSON endpoint the bridge uses
 works. It provisions each site for the bridge (settings from [engine.md#login](engine.md#login),
-the role groups, an API key) and writes the bridge's environment to `.local/discourse.env`.
+an API key) and writes the bridge's environment to `.local/discourse.env`.
 `.local/` is gitignored; deleting it and both containers resets everything.
 
 The tests serve the bridge on `localhost:8765` against those sites, and a stand-in archon on
@@ -50,6 +50,7 @@ The web app is `bridge:app` (ASGI); the sweep is `vekn-bridge-sweep`.
 **Two deploy shapes.** Discourse runs from its official Docker launcher (multisite) on a dedicated
 host — the one exception to the `server-setup` pattern, forced by the engine ([engine.md](engine.md)).
 Its `app.yml` must set `DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE` well above the default 60 for the
-bridge's sweep. Everything we write (the login bridge) follows
+bridge's sweep. The bridge's first sweep runs before a site opens its login or sets category
+security, since it creates the role groups both rely on. Everything we write (the login bridge) follows
 [`server-setup`](https://github.com/lionel-panhaleux/server-setup): pyinfra, systemd, nginx, the shared
 Postgres cluster.

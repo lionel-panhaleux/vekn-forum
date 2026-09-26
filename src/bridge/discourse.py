@@ -46,10 +46,13 @@ def encode(site: str, fields: dict[str, str]) -> dict[str, str]:
     return {"sso": sso, "sig": sign(site, sso)}
 
 
+def gate(site: str) -> set[str]:
+    """`DISCOURSE_<SITE>_MEMBERS`: the roles a gated site (playtest) admits; empty is open."""
+    return {r for r in env(site, "MEMBERS", "").split(",") if r}
+
+
 def admitted(site: str, roles: list[str]) -> bool:
-    """`DISCOURSE_<SITE>_MEMBERS` lists the roles a gated site (playtest) admits; unset is open."""
-    gate = env(site, "MEMBERS", "")
-    return not gate or bool(set(gate.split(",")) & set(roles))
+    return not gate(site) or bool(gate(site) & set(roles))
 
 
 def is_admin(site: str, roles: list[str], country: str | None) -> bool:
@@ -116,7 +119,7 @@ async def groups(site: str, prefix: str) -> list[str]:
 async def user_ids(site: str) -> set[int]:
     """Whoever the bridge may have to take rights from: admins, role and language group members,
     and on a gated site every user, since admission itself can be lost."""
-    lists = ["active"] if env(site, "MEMBERS", "") else ["admins"]
+    lists = ["active"] if gate(site) else ["admins"]
     ids = set()
     for query in lists:
         page = 1
@@ -167,7 +170,7 @@ async def admit(site: str, detail: dict, roles: list[str]) -> None:
     """On a gated site, suspend a member who lost admission and lift what the bridge suspended
     once it is regained. A suspension made by a moderator is never touched. `detail` is the
     user as `user()` reads it."""
-    if not env(site, "MEMBERS", ""):
+    if not gate(site):
         return
     user_id = detail["id"]
     until = detail.get("suspended_till")

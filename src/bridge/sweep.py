@@ -14,8 +14,14 @@ async def sweep() -> None:
     token = await archon.daemon_token()
     failed = False
     for site in discourse.sites():
-        await discourse.create_role_groups(site)
-        for user_id in sorted(await discourse.user_ids(site)):
+        try:
+            await discourse.create_role_groups(site)
+            user_ids = sorted(await discourse.user_ids(site))
+        except Exception:
+            failed = True
+            logger.exception("%s: failed", site)
+            continue
+        for user_id in user_ids:
             try:
                 await push(site, user_id, token)
             except Exception:

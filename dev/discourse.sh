@@ -60,8 +60,8 @@ for site in $SITES; do
     run "$NAME" sh -c "createdb discourse_$site 2>/dev/null || true" 
     run -e RAILS_DB="$site" "$NAME" bundle exec rake db:migrate > /dev/null
     secret=$(openssl rand -hex 16)
-    # Group names (the bridge creates the role groups) are validated as usernames: 3 characters minimum by default, and `ic`, `nc`,
-    # `pt` are two.
+    # Group names are validated as usernames: 3 characters minimum by default, and the role
+    # groups the bridge creates include `ic`, `nc`, `pt`.
     key=$(run -e RAILS_DB="$site" "$NAME" bundle exec rails runner "
         SiteSetting.min_username_length = 2
         SiteSetting.discourse_connect_url = '$BRIDGE_URL/discourse/$site'
