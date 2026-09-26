@@ -327,11 +327,13 @@ systemd.service(
     _if=any_changed(*unit_files, *code),
 )
 systemd.service(name="Sweep timer", service=f"{UNIT}-sweep.timer", running=True, enabled=True)
-# The sweep creates the role groups a login's payload names: run it once a site is (re)provisioned.
+nginx_site(site=NAME, domain=BASE, type="proxy", upstream=f"http://127.0.0.1:{BRIDGE_PORT}")
+
+# The sweep creates the role groups a login's payload names: run it once a site is (re)provisioned,
+# and again until it has succeeded.
+swept = host.get_fact(Command, f"systemctl show -p Result --value {units['sweep']}") == "success"
 server.shell(
     name="Sweep now",
     commands=[f"systemctl start {units['sweep']}"],
-    _if=lambda: any_changed(rebuild, *provisioned)(),
+    _if=lambda: not swept or any_changed(rebuild, *provisioned)(),
 )
-
-nginx_site(site=NAME, domain=BASE, type="proxy", upstream=f"http://127.0.0.1:{BRIDGE_PORT}")
