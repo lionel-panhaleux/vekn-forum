@@ -15,6 +15,51 @@ from starlette.middleware.sessions import SessionMiddleware
 from . import archon, discourse
 
 USERNAME = re.compile(r"[\w.-]{2,20}")
+#: Every page in every language; a new language is one more entry, and its code must be one of
+#: Discourse's locales, since it also becomes a new account's language.
+TEXT = {
+    "en": {
+        "expired": "Login expired",
+        "expired_body": "Go back to the forum and log in again.",
+        "down": "archon is unreachable",
+        "down_body": "Try again in a moment.",
+        "no_email": "Add an email in archon",
+        "no_email_body": "The forum links your account by the email archon has verified, and "
+        "archon has none for you yet.",
+        "open_archon": "Open archon",
+        "gated": "Playtesters only",
+        "gated_body": "This forum is open to archon's PT and PTC.",
+        "username": "Choose your username",
+        "username_label": "Shown on your posts, on every VEKN forum.",
+        "username_rule": "2 to 20 letters, digits, dots, dashes or underscores.",
+        "continue": "Continue",
+    },
+    "fr": {
+        "expired": "Connexion expirée",
+        "expired_body": "Revenez au forum et connectez-vous à nouveau.",
+        "down": "archon ne répond pas",
+        "down_body": "Réessayez dans un instant.",
+        "no_email": "Ajoutez un email dans archon",
+        "no_email_body": "Le forum relie votre compte par l'email qu'archon a vérifié, et archon "
+        "n'en a encore aucun pour vous.",
+        "open_archon": "Ouvrir archon",
+        "gated": "Réservé aux playtesteurs",
+        "gated_body": "Ce forum est ouvert aux PT et PTC d'archon.",
+        "username": "Choisissez votre pseudo",
+        "username_label": "Affiché sur vos messages, sur tous les forums VEKN.",
+        "username_rule": "De 2 à 20 lettres, chiffres, points, tirets ou tirets bas.",
+        "continue": "Continuer",
+    },
+}
+
+
+def language(request: Request) -> str:
+    """The first of the browser's languages we speak, else English."""
+    for part in request.headers.get("accept-language", "").split(","):
+        code = part.split(";")[0].strip().lower().split("-")[0]
+        if code in TEXT:
+            return code
+    return "en"
 
 
 async def db() -> psycopg.AsyncConnection:
@@ -65,25 +110,27 @@ async def login(request: Request, site: str, sso: str, sig: str):
 
 @app.get("/callback")
 async def callback(request: Request, state: str = "", code: str = ""):
+    t = TEXT[language(request)]
     login = request.session.get("login")
     if not login or not code or not secrets.compare_digest(state, login["state"]):
-        return page("Login expired", "<p>Go back to the forum and log in again.</p>", 400)
+        return expired(request)
     try:
         token = await archon.exchange_code(code, login["verifier"])
         info = await archon.userinfo(token)
         member = await archon.member(info["sub"], token)
     except archon.Error:
-        return page("archon is unreachable", "<p>Try again in a moment.</p>", 502)
+        return page(request, t["down"], f"<p>{t['down_body']}</p>", 502)
     if not info.get("email"):
         profile = html.escape(archon.app_url() + "/profile")
         return page(
-            "Add an email in archon",
-            "<p>The forum links your account by the email archon has verified, and archon has "
-            f'none for you yet.</p><p><a class="button" href="{profile}">Open archon</a></p>',
+            request,
+            t["no_email"],
+            f"<p>{t['no_email_body']}</p>"
+            f'<p><a class="button" href="{profile}">{t["open_archon"]}</a></p>',
             403,
         )
     if not discourse.admitted(login["site"], info["roles"]):
-        return page("Playtesters only", "<p>This forum is open to archon's PT and PTC.</p>", 403)
+        return page(request, t["gated"], f"<p>{t['gated_body']}</p>", 403)
     login |= {
         "uid": info["sub"],
         "email": info["email"],
@@ -110,18 +157,18 @@ async def callback(request: Request, state: str = "", code: str = ""):
 @app.get("/username")
 async def ask_username(request: Request):
     if "uid" not in request.session.get("login", {}):
-        return page("Login expired", "<p>Go back to the forum and log in again.</p>", 400)
-    return username_form()
+        return expired(request)
+    return username_form(request)
 
 
 @app.post("/username")
 async def set_username(request: Request, username: str = Form()):
     login = request.session.get("login", {})
     if "uid" not in login:
-        return page("Login expired", "<p>Go back to the forum and log in again.</p>", 400)
+        return expired(request)
     username = username.strip()
     if not USERNAME.fullmatch(username):
-        return username_form(username, "2 to 20 letters, digits, dots, dashes or underscores.")
+        return username_form(request, username, error=True)
     async with await db() as conn:
         await remember(conn, login["uid"], username)
     return await finish(request, username)
@@ -139,28 +186,41 @@ async def finish(request: Request, username: str) -> RedirectResponse:
     login = request.session.pop("login")
     site = login["site"]
     fields = await discourse.rights(site, login["uid"], login["roles"], login["country"])
-    fields |= {"nonce": login["nonce"], "email": login["email"], "username": username}
+    # `locale` sets a new account's language only; a member's own later choice is kept.
+    fields |= {
+        "nonce": login["nonce"],
+        "email": login["email"],
+        "username": username,
+        "locale": language(request),
+    }
     if discourse.gate(site) and (existing := await discourse.by_external_id(site, login["uid"])):
         await discourse.admit(site, await discourse.user(site, existing["id"]), login["roles"])
     query = urllib.parse.urlencode(discourse.encode(site, fields))
     return RedirectResponse(f"{login['return']}?{query}", 302)
 
 
-def username_form(value: str = "", error: str = "") -> HTMLResponse:
+def expired(request: Request) -> HTMLResponse:
+    t = TEXT[language(request)]
+    return page(request, t["expired"], f"<p>{t['expired_body']}</p>", 400)
+
+
+def username_form(request: Request, value: str = "", error: bool = False) -> HTMLResponse:
+    t = TEXT[language(request)]
     return page(
-        "Choose your username",
-        '<form method="post"><label for="u">Shown on your posts, on every VEKN forum.</label>'
+        request,
+        t["username"],
+        f'<form method="post"><label for="u">{t["username_label"]}</label>'
         f'<input id="u" name="username" value="{html.escape(value)}" required autofocus '
         'autocomplete="username" autocapitalize="none" spellcheck="false">'
-        + (f'<p class="error">{html.escape(error)}</p>' if error else "")
-        + '<button class="button">Continue</button></form>',
+        + (f'<p class="error">{t["username_rule"]}</p>' if error else "")
+        + f'<button class="button">{t["continue"]}</button></form>',
         400 if error else 200,
     )
 
 
-def page(title: str, body: str, status: int = 200) -> HTMLResponse:
+def page(request: Request, title: str, body: str, status: int = 200) -> HTMLResponse:
     return HTMLResponse(
-        f"""<!doctype html><html lang="en"><meta charset="utf-8">
+        f"""<!doctype html><html lang="{language(request)}"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)}</title>
 <style>

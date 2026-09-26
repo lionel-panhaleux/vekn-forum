@@ -2,7 +2,7 @@
 
 The stand-in speaks archon's documented contract (wiki/archon.md) over HTTP — consent, PKCE token
 exchange, userinfo, `client_credentials`, `/v1/users/{uid}` — and nothing of the bridge's
-internals. archon beta itself is proven after deploy (wiki/post-deploy.md).
+internals. archon itself is proven after deploy (wiki/post-deploy.md).
 """
 
 import base64
@@ -142,10 +142,13 @@ async def browser():
         yield client
 
 
-async def login(browser: httpx.AsyncClient, site: str, username: str | None = None):
+async def login(
+    browser: httpx.AsyncClient, site: str, username: str | None = None, lang: str = "en"
+):
     """What a member's browser does from the site's login button to landing back on it — on
     `/session/current.json`, which names who the site now sees as logged in."""
     url = os.environ[f"DISCOURSE_{site.upper()}_URL"]
+    browser.headers["accept-language"] = lang
     response = await browser.get(
         f"{url}/session/sso", params={"return_path": "/session/current.json"}
     )

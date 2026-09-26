@@ -60,8 +60,8 @@ refactors.
 - **Mocks are banned by default** — a mock that mirrors the code tests the code against itself. Use
   real dependencies (a real engine instance, a real Postgres, temp files) or don't test that path.
   archon is the exception: tests run against a local stand-in server that speaks its documented
-  contract ([archon.md](archon.md)) over HTTP, as rulings-website does, since archon beta cannot be
-  scripted into role changes; beta itself is proven after deploy ([post-deploy.md](post-deploy.md)).
+  contract ([archon.md](archon.md)) over HTTP, as rulings-website does, since the real archon cannot be
+  scripted into role changes; archon itself is proven after deploy ([post-deploy.md](post-deploy.md)).
 - Exception: property-style tests for genuinely hazardous invariants (parsing, concurrency) — the
   same spots KISS flags.
 - **Weakening or deleting a test is an egress rejection** unless the wiki-declared behaviour changed.

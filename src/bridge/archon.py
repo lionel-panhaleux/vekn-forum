@@ -18,12 +18,12 @@ class Error(Exception):
 
 
 def app_url() -> str:
-    return os.getenv("ARCHON_URL", "https://archon.krcg.org").rstrip("/")
+    return os.getenv("ARCHON_URL", "https://archon.vekn.net").rstrip("/")
 
 
 def api_url() -> str:
     """The public API lives on its own host; userinfo does not exist there."""
-    return os.getenv("ARCHON_API_URL", "https://api.archon.krcg.org").rstrip("/")
+    return os.getenv("ARCHON_API_URL", "https://api.archon.vekn.net").rstrip("/")
 
 
 def redirect_uri() -> str:

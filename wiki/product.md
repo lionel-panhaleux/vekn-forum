@@ -30,6 +30,9 @@ ingress. *(Decided 2026-09-26.)*
 
 ## Scope
 
+- **Every site speaks English and French**, more languages later: each member reads the interface
+  in their browser's language, then in the one they pick; a site has a default (French for
+  France). Posts stay in the language they are written in. *(Decided 2026-09-26.)*
 - **One deployment, one site per community**: each national community, the international community,
   and the playtest community. **A role community gets its own site only when its content is
   confidential** — playtest (NDA) does; the judges are a section of the international site. Each

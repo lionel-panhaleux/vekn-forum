@@ -64,6 +64,8 @@ for site in $SITES; do
     # groups the bridge creates include `ic`, `nc`, `pt`.
     key=$(run -e RAILS_DB="$site" "$NAME" bundle exec rails runner "
         SiteSetting.min_username_length = 2
+        SiteSetting.set_locale_from_accept_language_header = true
+        SiteSetting.default_locale = '$site' == 'fr' ? 'fr' : 'en'
         SiteSetting.discourse_connect_url = '$BRIDGE_URL/discourse/$site'
         SiteSetting.discourse_connect_secret = '$secret'
         SiteSetting.enable_discourse_connect = true

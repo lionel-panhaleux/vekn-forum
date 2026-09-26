@@ -42,6 +42,15 @@ async def test_a_first_login_asks_a_username_once_and_creates_the_user(archon, b
     assert (await discourse_user("intl", uid))["username"] == name
 
 
+async def test_a_french_browser_gets_french_pages_and_a_french_account(archon, browser):
+    uid = archon.member()
+    response = await login(browser, "intl", lang="fr-FR,fr;q=0.9,en;q=0.8")
+    assert '<html lang="fr">' in response.text and "Choisissez votre pseudo" in response.text
+    response = await browser.post(str(response.url), data={"username": handle()})
+    user_id = (await discourse_user("intl", uid))["id"]
+    assert rails("intl", f"puts User.find({user_id}).locale").splitlines()[-1] == "fr"
+
+
 async def test_a_legacy_account_with_the_same_email_is_claimed_not_duplicated(archon, browser):
     uid = archon.member()
     old = handle()

@@ -10,7 +10,7 @@ Source for every claim below: the archon-vibe wiki (`vtes-biased/archon-vibe`, `
 ## Hosts
 
 Prod `archon.vekn.net`, beta `archon.krcg.org`. Separate databases: an OAuth client is registered on
-each. Public API at `api.<domain>` (prod pending its first deploy as of 2026-09-26).
+each. Public API at `api.<domain>`, live on both.
 
 ## OAuth2 provider
 

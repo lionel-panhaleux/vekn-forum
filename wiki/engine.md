@@ -33,6 +33,11 @@ runs the archon PKCE flow with `profile:email`, reads `country` from archon's pu
   scope ([archon.md](archon.md)). The bridge passes it through and stores none. Every site sets
   `auth_overrides_email` (the address is rewritten from archon on each login) and therefore
   `email_editable` off, which Discourse requires for it: a member changes their email in archon.
+- `locale` = the language the bridge spoke to the member, which Discourse applies only when it
+  creates the account; after that the member's own choice stands. Every site sets
+  `set_locale_from_accept_language_header` and its `default_locale`; the bridge's own pages speak
+  the browser's first language it has, else English. Discourse cannot narrow its language menu, so
+  every locale it ships stays selectable.
 - **Never `require_activation`, never an unverified email.** Discourse links a new `external_id` to
   an existing user by email only without it — that match *is* the legacy claim. With it, the match
   is skipped and a legacy address fails as a duplicate; an unverified email without it would hand
