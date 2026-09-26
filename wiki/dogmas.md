@@ -17,7 +17,7 @@ its owner on every login or refresh — never edited locally, never trusted stal
 an official or well-maintained plugin, our own plugin or theme component through the engine's
 public extension points (Discourse plugins, theme components, DiscourseConnect). Patching or forking
 Discourse core is a rejection. Our own code is the glue only: the login bridge, the base theme and its
-components, the NC console plugin, import tooling, deploy. *(2026-09-26.)*
+components, the console plugin, import tooling, deploy. *(2026-09-26.)*
 
 ## Code
 

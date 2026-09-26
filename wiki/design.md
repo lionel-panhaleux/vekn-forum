@@ -1,7 +1,7 @@
 # Design
 
 The standing design brief, applied by `/product` and checked at ingress and egress. We design for
-the **NC and the Prince first** — their recurring jobs are in [product.md#personas](product.md#personas)
+**coordinators and section leads first** — their recurring jobs are in [product.md#personas](product.md#personas)
 — and for members second. Principles shared with archon are borrowed from archon-vibe's
 `wiki/design.md` (2026-09-26) so a member moving between the two apps finds the same logic.
 
@@ -26,14 +26,14 @@ deletion), naming the undo where there is one.
 **One primary action per screen.** The rest collapses into an overflow menu.
 
 **Niche is a cut even when it is cheap** — a feature only a few members of one persona would use,
-rarely, taxes every reader. **Configurability is not a feature**: a setting an NC must understand
+rarely, taxes every reader. **Configurability is not a feature**: a setting a coordinator must understand
 to get a sane result is a default we failed to choose.
 
 **Consistency across sites beats per-site novelty.** Identity is tokens, not layout (below).
 
 ## Time-savers land first
 
-**A recurring NC or Prince job is at most two taps from the console** ([below](#nc-console)) once
+**A recurring coordinator or section-lead job is at most two taps from the console** ([below](#console)) once
 the console exists, and never needs Discourse's admin panel. One act that does three things
 (post, mail, chat push) beats three screens that each do one well. Prefill everything the platform
 already knows — archon's tournament, the playgroup's venue, the community's lists — rather than
@@ -57,11 +57,12 @@ components and interactions, maintained once. A site's identity is only its toke
 needs, such as VTES card display, belong to the base theme. A need a token cannot
 express is a change to the base theme, for every site.
 
-## NC console
+## Console
 
-**A single mobile-first page, from our plugin, for the NC's and Prince's recurring jobs.**
+**A single mobile-first page, from our plugin, for the coordinator's and section lead's recurring
+jobs**, on every site.
 *(Decided 2026-09-26.)* Discourse's admin stays reachable for the rare rest. Its contents are exactly
-the NC and Prince jobs in [product.md#personas](product.md#personas) — one added there is one
+the coordinator and section-lead jobs in [product.md#personas](product.md#personas) — one added there is one
 the console serves.
 
 ## Cut

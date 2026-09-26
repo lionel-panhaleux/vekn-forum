@@ -1,9 +1,9 @@
 # CLAUDE.md
 
-A shared forum platform for **VEKN** national communities (VTES): one deployment, one space per
-community with its own graphical identity, login through **archon**, National Coordinators
-administering their space and Princes leading playgroup sections. Built on an adopted open-source
-forum engine, not written from scratch — see [`wiki/product.md`](wiki/product.md).
+A shared forum platform for **VEKN** communities (VTES): one deployment, one site per community
+with its own graphical identity, login through **archon**, coordinators (NC, IC, PTC) administering
+their community and section leads (Princes, language leads) under them. Built on an adopted
+open-source forum engine, not written from scratch — see [`wiki/product.md`](wiki/product.md).
 
 ## Three lifespans
 
@@ -37,7 +37,8 @@ Context lives in the wiki, asks live on the board. Never the other way round.
   substantive changes land here.
 - **`/upkeep`** — maintenance, every 20 shipped lines or monthly: wiki lint, board eviction, harness
   ratchet.
-- **`/product`** — the product lens: `scout` for NC/Prince time-savers, `audit` for keep/cut/merge at phone width, and the gate `/intake` and
+- **`/product`** — the product lens: `scout` for coordinator time-savers, `audit` for
+  keep/cut/merge at phone width, and the gate `/intake` and
   `/ship` apply to anything a user sees.
 
 Egress review is by a fresh-context agent that has not seen the implementation conversation. Its

@@ -1,6 +1,6 @@
 ---
 name: product
-description: The product lens — make VTES community management effortless for NCs and Princes, on clean, mobile-first, noise-free screens. `/product scout` hunts time-savers in their recurring jobs; `/product audit <surface>` runs a keep/cut/merge subtraction pass at phone width. Also the gate /intake and /ship apply to any user-facing change. Use when designing, reviewing or questioning anything a user sees, or when looking for what to build next.
+description: The product lens — make VTES community management effortless for coordinators (NC, IC, PTC, Rulemonger) and section leads (Prince, language leads), on clean, mobile-first, noise-free screens. `/product scout` hunts time-savers in their recurring jobs; `/product audit <surface>` runs a keep/cut/merge subtraction pass at phone width. Also the gate /intake and /ship apply to any user-facing change. Use when designing, reviewing or questioning anything a user sees, or when looking for what to build next.
 ---
 
 # /product — less, and the right less
@@ -9,8 +9,8 @@ Every verdict lives in the wiki: personas and their recurring jobs in `wiki/prod
 the design brief, its numbers and the cut list in `wiki/design.md`. Read both first. This skill is
 the method only; where it needs a number or a rule, it points there.
 
-Two forces, always together: **push** what saves an NC or a Prince time, and **cut** what serves
-no one. A pass that only adds, or only removes, has done half the job.
+Two forces, always together: **push** what saves a coordinator or a section lead time, and **cut**
+what serves no one. A pass that only adds, or only removes, has done half the job.
 
 ## The gate
 
@@ -30,7 +30,7 @@ user-facing change lands. One line each:
 
 ## `/product scout`
 
-Hunt time-savers. For each persona, NC and Prince first:
+Hunt time-savers. For each persona, coordinator and section lead first:
 
 1. Walk each recurring job end to end on the real platform (or, before it runs, on Discourse's
    behaviour as documented) — count taps, screens, fields, context switches (forum → mail → chat).
@@ -38,8 +38,8 @@ Hunt time-savers. For each persona, NC and Prince first:
    an act split across tools that could be one, a job that needs Discourse admin.
 3. Look outward for shortcuts other community tools give organisers — only those that would serve
    a named job here.
-4. Also name jobs **missing** from `product.md#personas` — what an NC or Prince does often that
-   nobody listed.
+4. Also name jobs **missing** from `product.md#personas` — what a coordinator or section lead does
+   often that nobody listed.
 
 Output: a short ranked list, biggest time saved first, each with the job, the friction, the
 proposed shortcut and its cost. The human picks; each accepted item goes through `/intake`, and a

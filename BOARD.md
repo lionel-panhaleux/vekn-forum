@@ -21,8 +21,8 @@ follow-up ("chase @lip, 12 Sep"), owned by whoever wrote it.
 - Base theme and France identity — the shared base theme (remote git) with a component turning `[[Card Name]]` into a card image on hover (images from krcg), installed on the local sites; fr tokens set on the fr site. Doc-impact: design.md, engine.md.
 - Tournament mirror — each upcoming archon tournament of a country appears as a topic in its site's tournaments category, updated when archon changes it. Doc-impact: engine.md, archon.md.
 - Privacy notice — every site links a GDPR notice naming the controller, what is held (archon uid, email, posts, IP logs) and retention. Doc-impact: product.md.
-- NC console — a plugin page where each NC and Prince job in `wiki/product.md#personas` meets `wiki/design.md#time-savers-land-first` and `#mobile-first`, contents fixed by a first `/product scout`. Doc-impact: design.md, product.md, engine.md.
+- Console — a plugin page where each coordinator and section-lead job in `wiki/product.md#personas` meets `wiki/design.md#time-savers-land-first` and `#mobile-first`, contents fixed by a first `/product scout`. Doc-impact: design.md, product.md, engine.md.
 - Production host — ask Lionel before renting or touching DNS: a dedicated Docker host runs the fr and international sites on platform subdomains, with backups. Doc-impact: operations.md.
-- Listmonk — self-hosted per server-setup; community lists fed by the bridge, each NC managing only their community's lists; role lists (judges for Rulemongers, playtesters by language for PTCs) synced from archon, which needs archon to hand role holders' emails to a trusted daemon client and to model a playtest language. Doc-impact: product.md, archon.md, operations.md.
+- Listmonk — self-hosted per server-setup; every list mirrors a Discourse group, kept in sync by the bridge; a coordinator or section lead manages only their groups' lists. Doc-impact: product.md, engine.md, operations.md.
 
 <!-- cycles-since-upkeep: 0 -->

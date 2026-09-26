@@ -11,7 +11,10 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Ours | Discourse |
 |---|---|
 | Community space (France, Germany, …) | One **site** of the multisite: own database, theme, locale, settings, admins, domain. |
-| Cross-community space (international) | Its own site; IC members are its admins. |
+| International community | Its own site; ICs are its admins. |
+| Playtest community | Its own site (NDA content isolated in its own database); PTCs are its admins. |
+| Judges | A section of the international site, moderated by the Rulemongers' role group. |
+| Language section (playtest, judges) | A subcategory visible only to its language group (`pt-fr`, `judge-fi`, …), owned by its language lead, who adds members without being admin. The role-wide English section is muted by default through the role group's default notification levels: opt-in. |
 | NC | `admin` on the site of their archon `country`. |
 | Section / playgroup | A category (subcategories for cities under a region). |
 | Prince leading a section | Member of the section's moderating group; the NC assigns it on their site. |
@@ -41,7 +44,9 @@ archon PKCE flow, reads `country` from archon's public API, and signs each site 
 The bridge owns `admin` outright and the role groups, nothing else: an NC delegates through
 moderators and section groups, never by granting admin. It sends only `add_groups`/`remove_groups`
 for its role groups, never the full `groups` list, so the section groups an NC assigns are never
-touched. Rights are re-pushed through `sync_sso`, not only at login, so a revoked NC loses admin
+touched — except that a member losing an archon role is removed from that role's language groups
+(`pt-*`, `judge-*`): archon decides who may be in them, the lead decides which language. Rights
+are re-pushed through `sync_sso`, not only at login, so a revoked NC loses admin
 without logging in again. The same archon login creates the user on any site on first visit, so
 one user table per site stays invisible.
 
@@ -49,7 +54,7 @@ one user table per site stays invisible.
 email matches is linked on first login — posts and username included, nothing to click. The email
 match relinks even a user already linked to another archon uid; archon's unique addresses keep
 that from happening. A dead legacy address, or a guest-post placeholder (`anonymous_users`,
-`@no-email.invalid`), is merged by the site's NC through Discourse's admin user merge, which moves
+`@no-email.invalid`), is merged by the site's coordinator through Discourse's admin user merge, which moves
 posts, quotes and mentions.
 
 ## Accepted costs
