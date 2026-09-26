@@ -35,6 +35,12 @@ silos ([community.md](community.md)). Members log in with their archon account
   synced from archon: judges for Rulemongers, playtesters by language for PTCs. Discourse's own mail (notifications, digests)
   stays on. *(Decided 2026-09-26.)*
 
+- **Playgroups are categories.** Each playgroup is a category led by its Prince; its description
+  carries venue, schedule and chat links; the site's category list is the directory. archon's
+  country-level community links show in the site sidebar only. *(Decided 2026-09-26.)*
+- **Anti-spam is archon's signup plus Discourse defaults** — trust levels and the flag review queue
+  worked by the NC and moderators; no approval queue. *(Decided 2026-09-26.)*
+
 ## Rollout
 
 - **France pilots**: its import, legacy-account claiming and identity are proven at full scale on one
@@ -42,6 +48,12 @@ silos ([community.md](community.md)). Members log in with their archon account
 - **Domains**: every site has a platform subdomain; an association may point its own domain at its
   site, which also carries its old phpBB URL redirects. *(Decided 2026-09-26.)*
 - **Ownership**: runs on Lionel's infra and account for now, to be handed to VEKN if it takes.
+  *(Decided 2026-09-26.)*
+- **New sites: the NC asks, the operator creates**, batched into maintenance windows — not
+  self-service, because adding a site restarts every site of the multisite; a web form would own
+  that. *(Decided 2026-09-26.)*
+- **vekn.net's forum** may later be offered to VEKN for import into the international site
+  (Discourse ships a Kunena importer), once the France pilot proves the pattern. VEKN's call.
   *(Decided 2026-09-26.)*
 
 ## Deliberately not
