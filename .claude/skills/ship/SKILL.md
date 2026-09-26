@@ -25,8 +25,8 @@ abstraction, do it inside this task. Only genuinely separable discoveries go bac
 Never leave the board longer than you found it, minus the line you completed.
 
 Hold to `wiki/dogmas.md` while you write: tight and local, no TODOs, comments only for traps,
-mocks banned, tests at the boundary. A user-facing change also holds to `wiki/design.md` and passes
-the `/product` gate, 393 px screenshot included, before it lands.
+mocks banned, tests at the boundary. A user-facing change also passes the `/product` gate
+before it lands.
 
 ## 3. Land the trinity
 
@@ -46,7 +46,8 @@ for a real GitHub issue.
 ## 4. Egress
 
 Spawn the `egress-reviewer` subagent. It has not seen this conversation, and must not: give it the
-commit range or diff, the board line text you just deleted, and nothing else — it reads `wiki/` and
+commit range or diff, the board line text you just deleted, the paths of the `/product` gate's
+screenshots for a user-facing change, and nothing else — it reads `wiki/` and
 the code itself.
 
 - **Blocking** findings: fix them in this task and re-run the reviewer. Expect first-round scope

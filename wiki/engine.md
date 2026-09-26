@@ -15,7 +15,8 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | NC | `admin` on the site of their archon `country`. |
 | Section / playgroup | A category (subcategories for cities under a region). |
 | Prince leading a section | Member of the section's moderating group; the NC assigns it on their site. |
-| VTES card display, icons | Theme components, per site. |
+| Base theme, card display | One remote git theme with its components, installed on every site and updated from git. |
+| Community identity | That theme's settings on each site: the tokens of [design.md#theming](design.md#theming). |
 | Legacy phpBB author | User from the phpBB3 importer, email kept; claimed as below. |
 
 ## Login

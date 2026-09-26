@@ -28,7 +28,7 @@ go into the wiki or the harness, not into auto-memory (off for this repo).
 
 Context lives in the wiki, asks live on the board. Never the other way round.
 
-## The three loops
+## The loops
 
 - **`/intake`** — ingress. Nothing reaches the board unchallenged: conflict, completability, scope,
   doc-impact. Use it whenever new work arrives and is not being done right now.
@@ -37,8 +37,7 @@ Context lives in the wiki, asks live on the board. Never the other way round.
   substantive changes land here.
 - **`/upkeep`** — maintenance, every 20 shipped lines or monthly: wiki lint, board eviction, harness
   ratchet.
-- **`/product`** — the product lens, a fourth skill by the human's choice (2026-09-26): `scout` for
-  NC/Prince time-savers, `audit` for keep/cut/merge at phone width, and the gate `/intake` and
+- **`/product`** — the product lens: `scout` for NC/Prince time-savers, `audit` for keep/cut/merge at phone width, and the gate `/intake` and
   `/ship` apply to anything a user sees.
 
 Egress review is by a fresh-context agent that has not seen the implementation conversation. Its

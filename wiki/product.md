@@ -6,9 +6,9 @@ silos ([community.md](community.md)). Members log in with their archon account
 
 ## Personas
 
-Recurring jobs, most frequent first. The NC console serves exactly these
+Recurring jobs, most frequent first. The NC console serves the NC and Prince ones
 ([design.md#nc-console](design.md#nc-console)); a user-facing change that serves none of them is
-cut at ingress. *(Proposed 2026-09-26; sharpened by `/product scout`.)*
+cut at ingress. *(Proposed 2026-09-26.)*
 
 - **NC** — announce to the whole community in one act (post, mail, chat push); open a playgroup
   and appoint its Prince; welcome a newcomer and route them to the nearest playgroup; handle flags;
@@ -18,7 +18,7 @@ cut at ingress. *(Proposed 2026-09-26; sharpened by `/product scout`.)*
   section.
 - **Role-list sender** (PTC, Rulemonger) — mail their list: playtesters in a language, judges.
 - **Member** — find the nearest playgroup and its chat; see upcoming tournaments; ask a rules or
-  beginner question; trade; recover their old posts.
+  beginner question, and read the cards a post names; trade; recover their old posts.
 
 ## Scope
 
@@ -81,6 +81,6 @@ cut at ingress. *(Proposed 2026-09-26; sharpened by `/product scout`.)*
 ## Deliberately not
 
 - **Not a chat platform.** Chat groups live in WhatsApp, Telegram and Discord; Discourse's built-in
-  chat stays off. *(Decided 2026-09-26.)*
+  chat is cut ([design.md#cut](design.md#cut)). *(Decided 2026-09-26.)*
 - **Not a mail server.** Outgoing mail goes through an SMTP relay.
 - **Not a source of identity or roles.** Those are archon's.

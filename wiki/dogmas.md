@@ -16,8 +16,8 @@ its owner on every login or refresh — never edited locally, never trusted stal
 **The engine is upstream; we configure, we don't fork.** In order of preference: engine settings,
 an official or well-maintained plugin, our own plugin or theme component through the engine's
 public extension points (Discourse plugins, theme components, DiscourseConnect). Patching or forking
-Discourse core is a rejection. Our own code is the glue only: the login bridge, theme components,
-import tooling, deploy. *(2026-09-26.)*
+Discourse core is a rejection. Our own code is the glue only: the login bridge, the base theme and its
+components, the NC console plugin, import tooling, deploy. *(2026-09-26.)*
 
 ## Code
 

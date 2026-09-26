@@ -7,6 +7,10 @@ the **NC and the Prince first** — their recurring jobs are in [product.md#pers
 
 ## Less is more
 
+**Where these rules bind.** On our own surfaces — the console, the base theme — fully. On stock
+Discourse screens, only through settings and the base theme: subtract there, never patch core
+([dogmas.md#engine](dogmas.md#engine)).
+
 **Every element earns its place by serving a persona job.** What serves none is cut, not hidden
 behind a setting. On Discourse this is mostly subtraction: its defaults are **off until a job
 claims them**, and a cut is recorded below with its one-line reason.
@@ -21,12 +25,17 @@ deletion), naming the undo where there is one.
 
 **One primary action per screen.** The rest collapses into an overflow menu.
 
+**Niche is a cut even when it is cheap** — a feature only a few members of one persona would use,
+rarely, taxes every reader. **Configurability is not a feature**: a setting an NC must understand
+to get a sane result is a default we failed to choose.
+
 **Consistency across sites beats per-site novelty.** Identity is tokens, not layout (below).
 
 ## Time-savers land first
 
-**A recurring NC or Prince job is at most two taps from the console** ([below](#nc-console)), and
-never needs Discourse's admin panel. Prefill everything the platform already knows — archon's
+**A recurring NC or Prince job is at most two taps from the console** ([below](#nc-console)) once
+the console exists, and never needs Discourse's admin panel. One act that does three things (post,
+mail, chat push) beats three screens that each do one well. Prefill everything the platform already knows — archon's
 tournament, the playgroup's venue, the community's lists — rather than asking. A wizard fronts a
 form, it never replaces one.
 
@@ -38,24 +47,26 @@ Designed at **393×852** first, then enhanced for desktop.
 - **The first viewport shows the work**: a list reaches its first rows without scrolling; filters
   fold behind one control naming how many are active.
 - Modal heights in `dvh`, never `vh`; edge-anchored surfaces absorb the safe-area insets.
-- Checked by a screenshot at 393 px wide before a user-facing change lands.
 
 ## Theming
 
 **One shared base theme plus per-site tokens.** *(Decided 2026-09-26.)* The base theme owns layout,
 components and interactions, maintained once. A site's identity is only its tokens: logo, palette
-(with its light/dark pair), accent, icon set, optionally a heading font. A need a token cannot
+(with its light/dark pair), accent, icon set, optionally a heading font. Components every site
+needs, such as VTES card display, belong to the base theme. A need a token cannot
 express is a change to the base theme, for every site.
 
 ## NC console
 
 **A single mobile-first page, from our plugin, for the NC's and Prince's recurring jobs.**
 *(Decided 2026-09-26.)* Discourse's admin stays reachable for the rare rest. Its contents are exactly
-the jobs in [product.md#personas](product.md#personas) — a job added there is a job the console
-serves.
+the NC and Prince jobs in [product.md#personas](product.md#personas) — one added there is one
+the console serves.
 
 ## Cut
 
+The home for every Discourse feature we switch off.
+
 | Feature | Why |
 |---|---|
-| Discourse chat | Chat lives in WhatsApp, Telegram and Discord ([product.md](product.md)). |
+| Discourse chat | Chat lives in WhatsApp, Telegram and Discord. |
