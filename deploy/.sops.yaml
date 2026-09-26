@@ -1,0 +1,9 @@
+keys:
+  - &lionel ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+Fa+dmnpPBYM0G7xPupl+GkVdF6YFmZ/NkpyqOzWoI  # lionel-panhaleux
+  - &deploy ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDlN9QsXPGklb1BhEyGYankvkqoKGFlls4O0UWKe/YKf  # deploy (~/.ssh/deploy)
+
+creation_rules:
+  # identifiers stay readable next to the secret they pair with
+  - path_regex: secrets\.sops\.yaml$
+    unencrypted_regex: _client_id$
+    age: [*lionel, *deploy]

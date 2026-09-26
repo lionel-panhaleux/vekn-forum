@@ -23,6 +23,10 @@ vekn-bridge-sweep = "bridge.sweep:main"
 
 [dependency-groups]
 dev = ["pytest>=8", "pytest-asyncio", "ruff", "ty"]
+deploy = ["server-setup"]
+
+[tool.uv.sources]
+server-setup = { git = "https://github.com/lionel-panhaleux/server-setup", tag = "v2.0.0" }
 
 [tool.uv.build-backend]
 module-name = "bridge"

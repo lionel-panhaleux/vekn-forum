@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-REF=bf55a44c2872738f7ae2664d6fec3d6d8779190f
+REF=$(cat discourse/ref)
 SRC=.local/discourse
 NAME=vekn-forum-discourse
 SITES="fr intl playtest"
@@ -56,28 +56,22 @@ DISCOURSE_PLAYTEST_ADMINS=PTC
 DISCOURSE_PLAYTEST_MEMBERS=PT,PTC
 DATABASE_URL=postgresql://bridge:bridge@127.0.0.1:5434/bridge
 EOF
+docker cp discourse/site.rb "$NAME":/tmp/site.rb
 for site in $SITES; do
-    run "$NAME" sh -c "createdb discourse_$site 2>/dev/null || true" 
+    run "$NAME" sh -c "createdb discourse_$site 2>/dev/null || true"
     run -e RAILS_DB="$site" "$NAME" bundle exec rake db:migrate > /dev/null
     secret=$(openssl rand -hex 16)
-    # Group names are validated as usernames: 3 characters minimum by default, and the role
-    # groups the bridge creates include `ic`, `nc`, `pt`.
-    key=$(run -e RAILS_DB="$site" "$NAME" bundle exec rails runner "
-        SiteSetting.min_username_length = 2
-        SiteSetting.set_locale_from_accept_language_header = true
-        SiteSetting.default_locale = '$site' == 'fr' ? 'fr' : 'en'
-        SiteSetting.discourse_connect_url = '$BRIDGE_URL/discourse/$site'
-        SiteSetting.discourse_connect_secret = '$secret'
-        SiteSetting.enable_discourse_connect = true
-        SiteSetting.email_editable = false
-        SiteSetting.auth_overrides_email = true
-        if '$site' == 'playtest'
-          SiteSetting.login_required = true
-          SiteSetting.allow_index_in_robots_txt = false
-        end
-        ApiKey.where(description: 'bridge').destroy_all
-        puts ApiKey.create!(description: 'bridge', created_by_id: Discourse::SYSTEM_USER_ID).key
-    " | tail -1)
+    key=$(openssl rand -hex 32)
+    gated=""
+    [ "$site" = playtest ] && gated="-e SITE_GATED=1"
+    run -e RAILS_DB="$site" \
+        -e SITE_URL="http://$site.localhost:3000" \
+        -e SITE_LOCALE="$([ "$site" = fr ] && echo fr || echo en)" \
+        -e SITE_CONNECT_URL="$BRIDGE_URL/discourse/$site" \
+        -e SITE_CONNECT_SECRET="$secret" \
+        -e SITE_API_KEY="$key" \
+        $gated \
+        "$NAME" bundle exec rails runner /tmp/site.rb
     upper=$(echo "$site" | tr '[:lower:]' '[:upper:]')
     {
         echo "DISCOURSE_${upper}_URL=http://$site.localhost:3000"

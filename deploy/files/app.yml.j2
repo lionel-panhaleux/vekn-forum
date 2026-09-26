@@ -1,0 +1,60 @@
+# Discourse's launcher container, written by vekn-forum/deploy: every site of the multisite.
+templates:
+  - "templates/postgres.template.yml"
+  - "templates/redis.template.yml"
+  - "templates/web.template.yml"
+  - "templates/web.ratelimited.template.yml"
+  # host nginx terminates TLS and proxies to /shared/nginx.http.sock: no published port, which
+  # Docker would open past UFW
+  - "templates/web.socketed.template.yml"
+
+params:
+  version: {{ ref }}
+  db_shared_buffers: "512MB"
+  db_default_text_search_config: "pg_catalog.english"
+
+env:
+  LC_ALL: en_US.UTF-8
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US.UTF-8
+  UNICORN_WORKERS: 4
+  DISCOURSE_HOSTNAME: "{{ default_domain }}"
+  DISCOURSE_DEVELOPER_EMAILS: "{{ developer_emails }}"
+  DISCOURSE_SMTP_ADDRESS: smtp.gmail.com
+  DISCOURSE_SMTP_PORT: 587
+  DISCOURSE_SMTP_USER_NAME: "{{ mail }}"
+  DISCOURSE_SMTP_PASSWORD: "{{ mail_password }}"
+  DISCOURSE_SMTP_ENABLE_START_TLS: true
+  # the bridge's sweep reads and writes every member through the admin API
+  DISCOURSE_MAX_ADMIN_API_REQS_PER_MINUTE: 6000
+
+volumes:
+  - volume:
+      host: /var/discourse/shared/standalone
+      guest: /shared
+  - volume:
+      host: /var/discourse/shared/standalone/log/var-log
+      guest: /var/log
+
+hooks:
+  after_postgres:
+{% for site in extra_sites %}
+    - exec: sudo -u postgres createdb discourse_{{ site.db }} || exit 0
+    - exec: sudo -u postgres psql discourse_{{ site.db }} -c "grant all privileges on database discourse_{{ site.db }} to discourse; alter schema public owner to discourse;"
+    - exec: sudo -u postgres psql discourse_{{ site.db }} -c "create extension if not exists hstore; create extension if not exists pg_trgm; create extension if not exists vector;"
+{% endfor %}
+  before_bundle_exec:
+    - file:
+        path: $home/config/multisite.yml
+        contents: |
+{% for site in extra_sites %}
+          {{ site.db }}:
+            adapter: postgresql
+            database: discourse_{{ site.db }}
+            pool: 25
+            timeout: 5000
+            host_names:
+              - {{ site.domain }}
+{% endfor %}
+  after_bundle_exec:
+    - exec: cd /var/www/discourse && sudo -E -u discourse bundle exec rake multisite:migrate

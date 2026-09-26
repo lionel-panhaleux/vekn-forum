@@ -1,0 +1,10 @@
+[Unit]
+Description=Push Discourse's own backup archives to the fleet's restic bucket
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/postgres-backup/remote.env
+Environment=RESTIC_REPO={{ repo }}
+ExecStart=/usr/local/bin/{{ unit }}-discourse-backup

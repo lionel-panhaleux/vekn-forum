@@ -1,0 +1,21 @@
+[Unit]
+Description=vekn-forum login bridge
+After=network-online.target {{ postgres_unit }}
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ name }}
+Group={{ name }}
+WorkingDirectory={{ opt }}
+EnvironmentFile={{ etc }}/bridge.env
+ExecStart={{ opt }}/.venv/bin/uvicorn bridge:app --host 127.0.0.1 --port {{ port }} --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -16,21 +16,27 @@ archon's are on `vtes-biased/archon-vibe` `wiki/post-deploy.md`.
 
 ## Log in through archon and sweep against it
 
-Gated by the commit that first lands the bridge (`src/bridge/`, "Build the archon login bridge…"),
-and on archon's side by the release carrying `profile:email` reaching production. The local tests
-prove the bridge against a stand-in; this proves the same contract against archon production
-(`archon.vekn.net`, public API `api.archon.vekn.net`). It needs the vekn-forum client registered
-there by an IC or DEV from Developer with `profile:email` **and** `api:read` checked (one client
-serves both the login and the sweep), its purpose stated, and `http://localhost:8765/callback` as
-redirect URI.
+Gated by the commit that first deploys production ("Deploy the fr and international sites and the
+bridge to frankfurt"), and on archon's side by the release carrying `profile:email` reaching
+production. The local tests prove the bridge against a stand-in; this proves the same contract
+against archon production (`archon.vekn.net`, public API `api.archon.vekn.net`). It needs the
+vekn-forum client registered there by an IC or DEV from Developer with `profile:email` **and**
+`api:read` checked (one client serves both the login and the sweep), its purpose stated, and
+`https://forum.krcg.org/callback` as redirect URI; its id and secret go in `just secrets`.
 
-Run the local stack (`just discourse`), then the bridge against archon:
-`set -a; . .local/discourse.env; set +a; BRIDGE_URL=http://localhost:8765 BRIDGE_SECRET=… ARCHON_CLIENT_ID=… ARCHON_CLIENT_SECRET=… uv run uvicorn bridge:app --port 8765`.
-In a browser, open `http://fr.localhost:3000/session/sso?return_path=/session/current.json` as a
-member holding NC with country FR, then `http://intl.localhost:3000/session/sso?return_path=/session/current.json`;
-then run `uv run vekn-bridge-sweep` with the same environment.
+In a browser, open `https://fr.forum.krcg.org/session/sso?return_path=/session/current.json` as a
+member holding NC with country FR, then the same path on `intl.forum.krcg.org`; on frankfurt,
+`sudo systemctl start vekn-forum-sweep` and `journalctl -u vekn-forum-sweep`.
 
 It worked when the consent page names the forum's email purpose, both logins land on a JSON
-`current_user`, that user is admin on fr and not on intl (`/admin/users/list/admins.json` with the
-site's API key), and the sweep finishes without an archon error — its daemon token accepted by
-`api.archon.vekn.net`.
+`current_user`, that user is admin on fr and not on intl (the site's Admin → Users), and the sweep
+finishes without an archon error — its daemon token accepted by `api.archon.vekn.net`.
+
+## The production host serves, hides its container and backs up
+
+Gated by the same commit. On frankfurt: `sudo ss -ltnp` shows no port held by `docker-proxy`;
+`https://fr.forum.krcg.org` and `https://intl.forum.krcg.org` render their site, in French and
+English; `/u/admin-login` on either mails a login link to the developer email. The morning after the
+first deploy, `ls /var/discourse/shared/standalone/backups/*/` lists one archive per site, and
+`sudo systemctl status vekn-forum-discourse-backup` shows a push to `vekn_forum_discourse`, with no
+orphan warning for it in `journalctl -t postgres-backup`.

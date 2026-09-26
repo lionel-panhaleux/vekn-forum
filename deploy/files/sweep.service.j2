@@ -1,0 +1,16 @@
+[Unit]
+Description=vekn-forum sweep: re-push archon rights to every site
+After=network-online.target {{ postgres_unit }}
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User={{ name }}
+Group={{ name }}
+WorkingDirectory={{ opt }}
+EnvironmentFile={{ etc }}/bridge.env
+ExecStart={{ opt }}/.venv/bin/vekn-bridge-sweep
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
