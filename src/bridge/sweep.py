@@ -9,8 +9,8 @@ from collections.abc import Awaitable, Callable
 from . import archon, db, discourse
 
 logger = logging.getLogger("bridge.sweep")
-#: Seconds between archon lookups: 400 a minute of the 600 archon grants a client, the rest left
-#: to logins, which spend the same budget.
+#: Seconds between archon lookups: under archon's per-client lookup budget (wiki/archon.md),
+#: leaving room for logins, which spend the same budget.
 PACE = 0.15
 
 Lookup = Callable[[str], Awaitable[dict]]

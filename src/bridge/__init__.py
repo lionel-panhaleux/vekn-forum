@@ -138,7 +138,6 @@ async def callback(request: Request, state: str = "", code: str = ""):
     try:
         token = await archon.exchange_code(code, login["verifier"])
         info = await archon.userinfo(token)
-        # Only the daemon token is told a member's sanctions.
         member = await archon.member(info["sub"], await archon.daemon_token())
     except archon.Error:
         return page(lang, t["down"], f"<p>{t['down_body']}</p>", 502)

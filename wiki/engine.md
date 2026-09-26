@@ -58,17 +58,16 @@ is told sanctions), and signs each site a payload:
 
 The bridge owns exactly five things: `admin`; the role groups; **admission to the playtest site** —
 it refuses a playtest login without PT or PTC, and suspends there a member who loses both; **the
-VEKN ban** — a member archon holds an Ethics ban against (a `suspension` with no end date) is
-refused at login and suspended on every site where they have an account, and lifting the ban in
-archon lifts it; and **removal from language groups** when the role that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or
-Rulemonger; it finds them through the Discourse API by that prefix, so a language group must carry
-it. Archon decides who may be in a language group, its owner decides which language. The bridge lifts
-only suspensions carrying one of its own two reasons, a ban's outranking the gate's, so regaining PT
-while banned lifts nothing; a moderator's suspension is never touched. **Only a ban reaches the
-forums**: timed suspensions and probations are archon's tournament matters, and a member with no
-VEKN ID has no public API row, so a ban on them stays invisible to the bridge.
-*(Decided 2026-09-26.)* Coordinators
-delegate through moderators and section groups, never by granting admin. The bridge sends only
+VEKN ban** ([product.md](product.md#scope)) — a member archon holds an Ethics ban against (a
+`suspension` with no end date) is refused at login and suspended on every site where they have an
+account, and lifting the ban in archon lifts it; and **removal from language groups** when the role
+that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or Rulemonger; it finds them
+through the Discourse API by that prefix, so a language group must carry it. Archon decides who may
+be in a language group, its owner decides which language. The bridge lifts only suspensions
+carrying one of its own two reasons, a ban's outranking the gate's, so regaining PT while banned
+lifts nothing; a moderator's suspension is never touched. A member with no VEKN ID has no public API
+row, so a ban on them stays invisible to the bridge. Coordinators delegate through moderators and
+section groups, never by granting admin. The bridge sends only
 `add_groups`/`remove_groups` for the names it owns, never the full `groups` list.
 
 The bridge's own root lists every site, in the browser's language, so the platform address leads
@@ -81,7 +80,8 @@ site's admins, suspended users, role- and language-group members — every user,
 — and every member who ever logged in (the `usernames` table), for bans; it takes their
 roles and country from archon's public API with the bridge's own `api:read` token, and pushes them
 through `sync_sso`, so a revoked NC loses admin without logging in again. It looks each member up
-once per run, paced under archon's per-client lookup budget, which logins share. The bridge keeps no
+once per run, paced under archon's per-client lookup budget, which logins share — about 24 000
+members who ever logged in before a run outlasts the hourly timer. The bridge keeps no
 refresh token. Its burst of admin API calls needs Discourse's rate limit raised
 ([operations.md](operations.md#deploy)). The same archon login creates the user on any site on first visit, so one
 user table per site stays invisible.

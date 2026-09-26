@@ -73,7 +73,8 @@ ingress. *(Decided 2026-09-26.)*
   worked by the coordinator and moderators; no approval queue. *(Decided 2026-09-26.)*
 
 - **An archon Ban suspends everywhere.** A member under an active Ethics Ban sanction in archon is
-  suspended on every site; lifting it lifts the suspension. *(Decided 2026-09-26.)*
+  suspended on every site; lifting it lifts the suspension. Only a ban: timed suspensions and
+  probations are archon's tournament matters and do not reach the forums. *(Decided 2026-09-26.)*
 - **GDPR.** Every site shows a privacy notice naming the controller (Lionel, while he runs it), what
   is held and why; archon's consent screen for the `email` scope says what the forum does with the
   address. *(Decided 2026-09-26.)*
