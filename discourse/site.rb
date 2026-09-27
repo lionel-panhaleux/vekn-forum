@@ -37,8 +37,11 @@ SiteSetting.fixed_category_positions = true
 # Discourse seeds General and Site Feedback until a human joins; they serve no section
 # (wiki/design.md#cut). Removed while only the system has posted there: its topics go to the trash, via
 # Uncategorized, which Discourse lists like any other category when this setting has lost it.
-uncategorized = Category.find_by(id: SiteSetting.uncategorized_category_id)
+# A site can lose the setting while keeping its seeded category (fr in production did): point it back.
+uncategorized =
+  Category.find_by(id: SiteSetting.uncategorized_category_id) || Category.find_by(slug: "uncategorized")
 raise "uncategorized_category_id #{SiteSetting.uncategorized_category_id} names no category" if !uncategorized
+SiteSetting.uncategorized_category_id = uncategorized.id
 removed =
   %w[general_category_id meta_category_id].filter_map do |setting|
     category = Category.find_by(id: SiteSetting.get(setting)) or next
