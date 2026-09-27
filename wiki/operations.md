@@ -84,8 +84,8 @@ What the forum becomes:
   Private messages are not imported, nor attachments and avatars, whose files the dump lacks.
 - **Old URLs.** `/forum/viewforum.php?f=`, `/forum/viewtopic.php?t=` and `?p=` redirect to their
   category, topic and post on the site, through permalinks stored without `forum/` and the
-  `permalink_normalizations` site setting the importer writes to strip it; `www.vekn.fr/forum/` does only once vekn.fr sends `/forum/` to
-  it ([product.md#rollout](product.md#rollout)).
+  `permalink_normalizations` site setting the importer writes to strip it; `www.vekn.fr/forum/`
+  does only once vekn.fr sends `/forum/` to it ([product.md#rollout](product.md#rollout)).
 
 ## Bridge
 

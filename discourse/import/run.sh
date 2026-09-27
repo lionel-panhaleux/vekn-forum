@@ -9,7 +9,7 @@ NAME=${2:-vekn-forum-discourse}
 ROOT=${3:-/src}
 DB=vekn-phpbb
 
-# The dump is loaded afresh on every run, and its copy dropped on exit: it holds every member's email.
+# A fresh copy of the dump for each run, dropped on exit (wiki/operations.md#phpbb-import).
 docker rm -f "$DB" > /dev/null 2>&1 || true
 docker network create vekn-import > /dev/null 2>&1 || true
 trap 'docker rm -f "$DB" > /dev/null' EXIT
