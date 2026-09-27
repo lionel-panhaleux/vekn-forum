@@ -3,6 +3,7 @@
 import json
 import os
 import pathlib
+import re
 
 import httpx
 
@@ -33,3 +34,13 @@ def test_a_site_without_one_wears_the_base_palettes():
     light, dark = palettes("intl")
     assert light.items() >= schemes["VEKN"].items()
     assert dark.items() >= schemes["VEKN Dark"].items()
+
+
+def test_every_site_serves_the_base_theme_icons():
+    names = re.findall(r'<symbol id="([^"]+)"', (REPO / "theme/assets/icons.svg").read_text())
+    assert names
+    for site in ("fr", "intl"):
+        url = os.environ[f"DISCOURSE_{site.upper()}_URL"]
+        host = httpx.URL(url).host
+        for name in names:
+            assert httpx.get(f"{url}/svg-sprite/{host}/icon/{name}.svg").status_code == 200, name

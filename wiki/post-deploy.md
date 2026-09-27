@@ -58,11 +58,13 @@ the first sweep, and is unsuspended on both after the second.
 
 ## The fr site wears France's identity, and shows cards
 
-Gated by the commit "Theme every site from a shared base, and dress fr in France's tokens". In a
+Gated by the commits "Theme every site from a shared base, and dress fr in France's tokens" and
+"Give sections VEKN icons, and members a light/dark toggle". In a
 browser, open `https://fr.forum.krcg.org` in light and dark system mode, then post
 `[[Anson]] et [[Diriger les indécis]]` in a test topic.
 
 It worked when the header is black with the V:EKN wordmark over a red rule, the tab shows the red
 V, dark mode keeps a red (not pink) accent, and hovering each name shows its scan — the second in
-French; on a phone, a tap shows it and another dismisses it. `https://intl.forum.krcg.org` wears
+French; on a phone, a tap shows it and another dismisses it. The sidebar's foot has the light/dark
+toggle, and a category set to a `vekn-*` icon in its settings shows it. `https://intl.forum.krcg.org` wears
 the base palettes.

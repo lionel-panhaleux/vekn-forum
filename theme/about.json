@@ -3,6 +3,9 @@
   "about_url": "https://github.com/lionel-panhaleux/vekn-forum",
   "license_url": "https://github.com/lionel-panhaleux/vekn-forum/blob/main/LICENSE",
   "component": false,
+  "assets": {
+    "icons-sprite": "assets/icons.svg"
+  },
   "color_schemes": {
     "VEKN": {
       "primary": "2A2520",

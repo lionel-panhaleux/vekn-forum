@@ -29,6 +29,7 @@ ApiKey.find_or_create_by!(description: "bridge", key_hash: hash) do |k|
   k.created_by_id = Discourse::SYSTEM_USER_ID
 end
 SiteSetting.enable_powered_by_discourse = false
+SiteSetting.interface_color_selector = "sidebar_footer"
 
 # The base theme (wiki/design.md#theming), re-imported from its directory on every run; found by
 # name, since the import creates a new theme when not handed one.

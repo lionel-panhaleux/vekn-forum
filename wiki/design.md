@@ -59,6 +59,9 @@ heading font from Discourse's list. Tokens are Discourse's own settings, not the
 Components every site needs, such as VTES card display, belong to the base theme. A need a token
 cannot express is a change to the base theme, for every site.
 
+A site follows the device's light or dark mode; a member can pin either from the toggle at the foot of
+the sidebar, as in archon.
+
 The base theme's one mark is a rule in the accent colour under the header. Text in an accent passes
 WCAG AA (4.5:1) against its palette's background: France's dark accent is a lighter red than its
 light one for that reason.
@@ -66,6 +69,30 @@ light one for that reason.
 **Card display.** `[[Card Name]]` in a post, English or translated, shows the card's scan — in the
 site's language when krcg has it — on hover where the device hovers, and on tap (dismissed by
 another) otherwise. A name krcg does not know stays as typed; code and links are left alone.
+
+## Category icons
+
+**A category's icon names its kind of section, the same on every site**; the base theme's sprite
+(`theme/assets/icons.svg`) draws them as filled silhouettes beside VTES's own symbols. A category
+takes its kind's icon, in one red per site that reads on both palettes (France: `#C8102E`, 5.5:1 on
+paper, 3.2:1 on dark): the icons tell sections apart, not colours. A new kind of section is a new
+icon here, for every site.
+
+| Kind of section | Icon | Figure |
+|---|---|---|
+| Announcements | `vekn-announcements` | herald's trumpet |
+| Game, strategy, decks | `vekn-game` | two library cards, a discipline diamond |
+| Newcomers | `vekn-newcomers` | a blood drop — the Embrace |
+| Rules | `vekn-rules` | codex marked with an ankh |
+| Tournaments | `vekn-tournaments` | the Prince's crown |
+| Trading | `vekn-trading` | coins stamped with an ankh |
+| Regions and playgroups | `vekn-regions` | a domain's skyline |
+| International (English) | `vekn-international` | compass star |
+| Association | `vekn-association` | the political action symbol |
+| Off-topic | `vekn-offtopic` | the tavern goblet |
+| Archives | `vekn-archives` | a coffin — torpor |
+| Playtest | `vekn-playtest` | masquerade mask |
+| Judges | `vekn-judges` | Auspex's eye |
 
 ## Console
 
