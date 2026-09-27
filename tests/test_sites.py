@@ -8,6 +8,7 @@ import re
 import httpx
 
 REPO = pathlib.Path(__file__).parent.parent
+DESIGN = (REPO / "wiki/design.md").read_text()
 
 
 def palettes(site: str) -> list[dict[str, str]]:
@@ -38,9 +39,18 @@ def test_a_site_without_one_wears_the_base_palettes():
 
 def test_every_site_serves_the_base_theme_icons():
     names = re.findall(r'<symbol id="([^"]+)"', (REPO / "theme/assets/icons.svg").read_text())
-    assert names
+    assert sorted(names) == sorted(
+        re.findall(r"^\| [^|]+ \| `(vekn-[a-z]+)` \|", DESIGN, re.MULTILINE)
+    )
     for site in ("fr", "intl"):
         url = os.environ[f"DISCOURSE_{site.upper()}_URL"]
         host = httpx.URL(url).host
         for name in names:
             assert httpx.get(f"{url}/svg-sprite/{host}/icon/{name}.svg").status_code == 200, name
+
+
+def test_no_site_lists_discourse_stock_categories():
+    for site in ("fr", "intl"):
+        url = os.environ[f"DISCOURSE_{site.upper()}_URL"]
+        listed = httpx.get(f"{url}/categories.json").json()["category_list"]["categories"]
+        assert {"general", "site-feedback", "uncategorized"}.isdisjoint(c["slug"] for c in listed)

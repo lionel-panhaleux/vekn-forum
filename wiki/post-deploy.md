@@ -66,5 +66,6 @@ browser, open `https://fr.forum.krcg.org` in light and dark system mode, then po
 It worked when the header is black with the V:EKN wordmark over a red rule, the tab shows the red
 V, dark mode keeps a red (not pink) accent, and hovering each name shows its scan — the second in
 French; on a phone, a tap shows it and another dismisses it. The sidebar's foot has the light/dark
-toggle, and a category set to a `vekn-*` icon in its settings shows it. `https://intl.forum.krcg.org` wears
+toggle, and a category set to a `vekn-*` icon in its settings shows it in the accent. Neither site's
+categories page lists General, Site Feedback or Uncategorized. `https://intl.forum.krcg.org` wears
 the base palettes.

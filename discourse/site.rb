@@ -30,6 +30,23 @@ ApiKey.find_or_create_by!(description: "bridge", key_hash: hash) do |k|
 end
 SiteSetting.enable_powered_by_discourse = false
 SiteSetting.interface_color_selector = "sidebar_footer"
+SiteSetting.allow_uncategorized_topics = false
+
+# Discourse seeds General and Site Feedback until a human joins; they serve no section
+# (wiki/design.md#cut). Removed while only the system has posted there: its welcome topics go to the trash.
+%w[general_category_id meta_category_id].each do |setting|
+  category = Category.find_by(id: SiteSetting.get(setting)) or next
+  topics = Topic.with_deleted.where(category_id: category.id).where.not(id: category.topic_id)
+  next if topics.where.not(user_id: Discourse::SYSTEM_USER_ID).exists?
+  topics.find_each do |topic|
+    topic.update_columns(category_id: SiteSetting.uncategorized_category_id)
+    PostDestroyer.new(Discourse.system_user, topic.first_post, context: "site provisioning").destroy if !topic.deleted_at
+  end
+  category.reload.destroy!
+  # The web processes cache categories per locale; a destroy here clears only this process's.
+  I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
+  Site.clear_anon_cache!
+end
 
 # The base theme (wiki/design.md#theming), re-imported from its directory on every run; found by
 # name, since the import creates a new theme when not handed one.

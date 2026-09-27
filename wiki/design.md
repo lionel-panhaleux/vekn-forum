@@ -74,8 +74,8 @@ another) otherwise. A name krcg does not know stays as typed; code and links are
 
 **A category's icon names its kind of section, the same on every site**; the base theme's sprite
 (`theme/assets/icons.svg`) draws them as filled silhouettes beside VTES's own symbols. A category
-takes its kind's icon, in one red per site that reads on both palettes (France: `#C8102E`, 5.5:1 on
-paper, 3.2:1 on dark): the icons tell sections apart, not colours. A new kind of section is a new
+takes its kind's icon, drawn in the palette's accent whatever the category's colour, so it follows
+light and dark: the icons tell sections apart, not colours. A new kind of section is a new
 icon here, for every site.
 
 | Kind of section | Icon | Figure |
@@ -111,3 +111,5 @@ The home for every Discourse feature we switch off.
 | Discourse chat | Not a chat platform ([product.md#deliberately-not](product.md#deliberately-not)). |
 | "Powered by Discourse" footer | Serves no persona job. |
 | Choosing another theme | Consistency across sites; the base theme is the only selectable one. |
+| Stock categories (General, Site Feedback) | Every category is a section; removed while only the system has posted in them. |
+| Uncategorized topics | A topic belongs to a section; Discourse's Uncategorized stays, empty and unlisted. |
