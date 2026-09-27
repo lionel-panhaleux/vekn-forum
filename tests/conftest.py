@@ -1,4 +1,4 @@
-"""The bridge between the real local Discourse sites (`just discourse`) and a stand-in archon.
+"""The bridge between the real local Discourse sites (`just dev`) and a stand-in archon.
 
 The stand-in speaks archon's documented contract (wiki/archon.md) over HTTP — consent, PKCE token
 exchange, userinfo, `client_credentials`, `/v1/users/{uid}` with `sanctions` for the daemon token
@@ -6,13 +6,10 @@ alone — and nothing of the bridge's
 internals. archon itself is proven after deploy (wiki/post-deploy.md).
 """
 
-import asyncio
 import base64
 import hashlib
-import json
 import os
 import pathlib
-import re
 import secrets
 import socket
 import subprocess
@@ -31,12 +28,12 @@ from fastapi.responses import RedirectResponse
 
 ENV = pathlib.Path(__file__).parent.parent / ".local" / "discourse.env"
 if not ENV.exists():
-    raise RuntimeError("no local Discourse: run `just discourse` first")
+    raise RuntimeError("no local Discourse: run `just dev` first")
 for line in ENV.read_text().splitlines():
     key, _, value = line.partition("=")
     os.environ[key] = value.strip('"')
 ARCHON = f"http://127.0.0.1:{8766}"
-# Beside `just bridge` (8765, database `bridge`), so a test run disturbs neither its port nor its
+# Beside `just dev`'s bridge (8765, database `bridge`), so a test run disturbs neither its port nor its
 # members' handles; the `archon` fixture points the sites' login at this bridge for the session.
 BRIDGE_PORT = 8767
 os.environ |= {
@@ -155,40 +152,6 @@ def connect_url(site: str, value: str) -> str:
     return previous
 
 
-async def forget(site: str, user: dict) -> None:
-    """Delete a member a previous session created; Discourse deletes no admin or moderator."""
-    api = bridge.discourse.api
-    for right, revoke in (("admin", "revoke_admin"), ("moderator", "revoke_moderation")):
-        if user.get(right):
-            await api(site, "PUT", f"/admin/users/{user['id']}/{revoke}")
-    await api(site, "DELETE", f"/admin/users/{user['id']}.json", params={"delete_posts": "true"})
-
-
-async def reset() -> None:
-    """Forget the members and language groups tests made: the sweep reads every user of a gated
-    site, everyone who ever logged in and every language group, so leftovers slow every sweep."""
-    api = bridge.discourse.api
-    async with await bridge.db() as conn:
-        await conn.execute("TRUNCATE usernames")
-    for site in bridge.discourse.sites():
-        seen: set[int] = set()
-        while left := await api(
-            site, "GET", "/admin/users/list/all.json", params={"filter": "@example.com"}
-        ):
-            ids = {u["id"] for u in left}
-            assert not ids & seen, f"{site}: users {ids & seen} survived their deletion"
-            seen |= ids
-            await asyncio.gather(*(forget(site, u) for u in left))
-        found = await api(site, "GET", "/groups.json", params={"filter": "judge-"})
-        await asyncio.gather(
-            *(
-                api(site, "DELETE", f"/admin/groups/{g['id']}.json")
-                for g in found["groups"]
-                if re.fullmatch(r"judge-[0-9a-f]{6}", g["name"])
-            )
-        )
-
-
 @pytest.fixture(scope="session")
 async def archon():
     base, _, name = os.environ["DATABASE_URL"].rpartition("/")
@@ -202,10 +165,9 @@ async def archon():
     stand_in = Archon()
     serve(stand_in.app, 8766)
     serve(bridge.app, BRIDGE_PORT)
-    await reset()
-    bridge.sweep.PACE = 0.0  # archon's lookup budget; the stand-in has none
-    await bridge.sweep.sweep()  # as after a deploy: creates the role groups
     sites = bridge.discourse.sites()
+    for site in sites:
+        await bridge.discourse.create_role_groups(site)  # as the first sweep after a deploy
     dev = {
         site: connect_url(site, f"{os.environ['BRIDGE_URL']}/discourse/{site}") for site in sites
     }
@@ -218,7 +180,6 @@ async def archon():
 async def browser():
     async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
         yield client
-    await reset()
 
 
 async def login(
@@ -242,46 +203,10 @@ async def discourse_user(site: str, uid: str) -> dict:
     return await bridge.discourse.user(site, found["id"])
 
 
-# Rails boots in ~10 s: one runner for the whole session, started at import so it boots while the
-# session sets up, evaluating each snippet on the named site's database.
-RUNNER = subprocess.Popen(
-    ["docker", "exec", "-i", "-u", "discourse", "-w", "/src", "vekn-forum-discourse"]
-    + [
-        "bundle",
-        "exec",
-        "rails",
-        "runner",
-        """
-STDOUT.sync = true
-STDIN.each_line do |line|
-  site, code = JSON.parse(line)
-  out = StringIO.new
-  $stdout = out
-  error = begin
-    RailsMultisite::ConnectionManagement.with_connection(site) { eval(code) }
-    nil
-  rescue Exception => e
-    "#{e.class}: #{e.message}"
-  ensure
-    $stdout = STDOUT
-  end
-  STDOUT.puts({out: out.string, error: error}.to_json)
-end
-""",
-    ],
-    stdin=subprocess.PIPE,
-    stdout=subprocess.PIPE,
-    text=True,
-)
-
-
-def rails(site: str, code: str) -> str:
-    """Server-side Discourse, as the phpBB importer would act on it."""
-    assert RUNNER.stdin and RUNNER.stdout
-    RUNNER.stdin.write(json.dumps([site, code]) + "\n")
-    RUNNER.stdin.flush()
-    while not (line := RUNNER.stdout.readline()).startswith('{"out":'):
-        assert line, "the Rails runner exited"
-    reply = json.loads(line)
-    assert not reply["error"], reply["error"]
-    return reply["out"].strip()
+def sql(site: str, statement: str) -> None:
+    """A site's database directly, for a state no API reaches."""
+    subprocess.run(
+        ["docker", "exec", "-u", "discourse", "vekn-forum-discourse"]
+        + ["psql", "-d", f"discourse_{site}", "-v", "ON_ERROR_STOP=1", "-qc", statement],
+        check=True,
+    )

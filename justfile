@@ -1,17 +1,16 @@
 # Checks, local stack and deploy — wiki/operations.md.
 
-# The local Discourse multisite and the bridge's Postgres; idempotent.
-discourse:
-    ./dev/discourse.sh
-
-# The bridge on localhost:8765, logging in through archon beta with the dev client in .local/archon.env.
-bridge:
+# The local stack until Ctrl-C, which stops it all: Discourse (fr, intl, playtest) with its Postgres,
+# and the bridge on localhost:8765 through archon beta with the dev client in .local/archon.env.
+dev:
     #!/usr/bin/env bash
     set -euo pipefail
     if [ ! -f .local/archon.env ]; then
         echo "no .local/archon.env: register the dev archon client first (wiki/operations.md#local-stack)" >&2
         exit 1
     fi
+    trap 'just stop' EXIT
+    ./dev/discourse.sh
     set -a
     source .local/discourse.env
     BRIDGE_URL=http://localhost:8765
@@ -21,7 +20,12 @@ bridge:
     source .local/archon.env
     set +a
     : "${ARCHON_CLIENT_ID:?missing from .local/archon.env}" "${ARCHON_CLIENT_SECRET:?missing from .local/archon.env}"
-    exec uv run uvicorn bridge:app --port 8765 --reload --reload-dir src
+    uv run uvicorn bridge:app --port 8765 --reload --reload-dir src
+
+# Stop whatever `just dev` started, from anywhere; stopping twice is harmless.
+stop:
+    -@pkill -f "uvicorn bridge:app --port 8765"
+    -@docker stop vekn-forum-discourse vekn-forum-discourse-db > /dev/null 2>&1
 
 lint:
     uv run ruff check
@@ -34,7 +38,7 @@ fmt:
 typecheck:
     uv run --group deploy ty check --error-on-warning
 
-# Needs `just discourse` up.
+# Needs `just dev` up.
 test *args:
     uv run pytest {{ args }}
 

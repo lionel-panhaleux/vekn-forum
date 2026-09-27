@@ -6,11 +6,11 @@ Local dev, checks, CI and deploy.
 
 | recipe | meaning |
 |---|---|
-| `just discourse` | Bring up the local stack (below); idempotent, rerun after a reboot. |
-| `just bridge` | Serve the bridge to the local sites, logging in through archon beta (below). |
+| `just dev` | The local stack (below) until Ctrl-C, which stops all of it; rerun after changing the theme or a site's tokens. |
+| `just stop` | Stop what `just dev` started, from anywhere: an agent runs it before finishing. |
 | `just lint` / `just fmt` | ruff check and format. |
 | `just typecheck` | ty, warnings as errors. |
-| `just test` | pytest; needs `just discourse` up. `just test -k playtest` runs one. |
+| `just test` | pytest; needs `just dev` up. `just test -k playtest` runs one. |
 | `just deploy` | Deploy to production (below): shows every change, then asks; `--dry` only shows. |
 | `just secrets` | Edit the deploy's secrets (`deploy/secrets.sops.yaml`). |
 
@@ -26,24 +26,22 @@ frontend bundler run (its log: `/tmp/ember.log` in the container), no Sidekiq. I
 site with `discourse/site.rb` — the settings of [engine.md#login](engine.md#login), the base theme
 from `theme/`, the site's tokens from `discourse/sites/<site>/` when it has some, and the bridge's
 API key, the same script production runs — and writes the bridge's environment to
-`.local/discourse.env`. Rerun it after changing the theme or a site's tokens. The Discourse commit it checks out is
-`discourse/ref`, production's too.
+`.local/discourse.env`. The Discourse commit it checks out is `discourse/ref`, production's too.
 `.local/` is gitignored; deleting it and both containers resets everything.
 
-`just bridge` serves the bridge on `localhost:8765`, where every local site's login button points,
-logging in through archon beta (`archon.krcg.org`) as yourself. It reads the local sites from
+`just dev` runs it, then serves the bridge on `localhost:8765`, where every local site's login button
+points, logging in through archon beta (`archon.krcg.org`) as yourself. It reads the local sites from
 `.local/discourse.env` and a dev archon client from `.local/archon.env` (`ARCHON_CLIENT_ID=…`,
 `ARCHON_CLIENT_SECRET=…`): registered on beta from Developer like production's, with `profile:email`
-and `api:read`, but its own client, with `http://localhost:8765/callback` as redirect URI. The role
-groups a login names are created by the sweep, which `just test` runs.
+and `api:read`, but its own client, with `http://localhost:8765/callback` as redirect URI. Leaving
+it — Ctrl-C, or `just stop` from elsewhere — stops the bridge and both containers.
 
 The tests serve their own bridge on `localhost:8767`, with its own database (`bridge_test`), and a
 stand-in archon on `127.0.0.1:8766` that speaks archon's documented contract
-([dogmas.md#testing](dogmas.md#testing)), so `just bridge` can stay up through a run. They share the
+([dogmas.md#testing](dogmas.md#testing)), so `just dev` can stay up through a run. They share the
 sites: for the run, each site's login button points at the test bridge, and is pointed back after —
-a killed run leaves it there until the next run or `just discourse`. Before a run and after each
-login test they delete the members (`@example.com`) and language groups tests create, since the
-sweep reads every one of them.
+a killed run leaves it there until the next run or `just dev`. The role groups are created at the
+start of a run, as the first sweep after a deploy does.
 
 ## Bridge
 

@@ -47,7 +47,7 @@ than a third.
 
 ## Commands
 
-`just discourse` (local stack), `just test`, `just lint`, `just typecheck`. Details, dev setup and
+`just dev` (local stack, Ctrl-C or `just stop` ends it), `just test`, `just lint`, `just typecheck`. Details, dev setup and
 deploy live in [`wiki/operations.md`](wiki/operations.md).
 
 ## Commits

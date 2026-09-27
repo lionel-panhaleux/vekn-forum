@@ -4,8 +4,9 @@ import datetime
 import os
 import secrets
 
-from conftest import discourse_user, login, rails
+from conftest import discourse_user, login, sql
 
+from bridge import archon as archon_api
 from bridge import discourse, sweep
 
 
@@ -21,6 +22,17 @@ def handle() -> str:
 
 
 BAN = {"level": "suspension", "expires_at": None}
+
+
+async def swept(site: str, uid: str) -> None:
+    """What a sweep does to one member, without walking every user of every site."""
+    token = await archon_api.daemon_token()
+    user_id = (await discourse_user(site, uid))["id"]
+    await sweep.push(site, user_id, lambda u: archon_api.member(u, token))
+
+
+async def locale(site: str, username: str) -> str | None:
+    return (await discourse.api(site, "GET", f"/u/{username}.json"))["user"]["locale"]
 
 
 async def test_a_first_login_asks_a_username_once_and_creates_the_user(archon, browser):
@@ -53,8 +65,7 @@ async def test_a_french_browser_gets_french_pages_and_a_french_account(archon, b
     response = await login(browser, "intl", lang="fr-FR,fr;q=0.9,en;q=0.8")
     assert '<html lang="fr">' in response.text and "Choisissez votre pseudo" in response.text
     response = await browser.post(str(response.url), data={"username": handle()})
-    user_id = (await discourse_user("intl", uid))["id"]
-    assert rails("intl", f"puts User.find({user_id}).locale").splitlines()[-1] == "fr"
+    assert await locale("intl", (await discourse_user("intl", uid))["username"]) == "fr"
 
 
 async def test_a_browser_in_neither_language_keeps_the_site_default(archon, browser):
@@ -62,25 +73,20 @@ async def test_a_browser_in_neither_language_keeps_the_site_default(archon, brow
     response = await login(browser, "fr", lang="de-DE,de;q=0.9")
     assert '<html lang="en">' in response.text
     await browser.post(str(response.url), data={"username": handle()})
-    user_id = (await discourse_user("fr", uid))["id"]
-    assert rails("fr", f"puts User.find({user_id}).locale.inspect").splitlines()[-1] in (
-        "nil",
-        '""',
-    )
+    assert not await locale("fr", (await discourse_user("fr", uid))["username"])
 
 
 async def test_a_legacy_account_with_the_same_email_is_claimed_not_duplicated(archon, browser):
     uid = archon.member()
     old = handle()
-    legacy_id = rails(
-        "fr",
-        f"puts User.create!(username: '{old}', email: '{archon.members[uid]['email']}', "
-        "active: true, approved: true).id",
-    )
+    email = archon.members[uid]["email"]
+    fields = {"username": old, "email": email, "password": secrets.token_hex(16), "active": "true"}
+    await discourse.api("fr", "POST", "/users.json", data=fields)  # as the phpBB import leaves it
     response = await login(browser, "fr")
     assert response.json()["current_user"]["username"] == old
     user = await discourse_user("fr", uid)
-    assert str(user["id"]) == legacy_id.splitlines()[-1]
+    legacy = await discourse.api("fr", "GET", "/admin/users/list/all.json", params={"email": email})
+    assert [u["id"] for u in legacy] == [user["id"]]
     assert user["username"] == old
 
 
@@ -98,7 +104,7 @@ async def test_a_revoked_nc_loses_admin_without_logging_in(archon, browser):
     await login(browser, "fr", handle())
     assert (await discourse_user("fr", uid))["admin"]
     archon.members[uid]["roles"] = []
-    await sweep.sweep()
+    await swept("fr", uid)
     user = await discourse_user("fr", uid)
     assert not user["admin"] and "nc" not in {g["name"] for g in user["groups"]}
 
@@ -126,15 +132,16 @@ async def test_the_playtest_site_admits_pt_and_ptc_only_and_suspends_on_loss(arc
     assert response.json()["current_user"]
     # A moderator's past suspension, long expired, must not read as one.
     user_id = (await discourse_user("playtest", uid))["id"]
-    rails(
+    sql(
         "playtest",
-        f"User.find({user_id}).update!(suspended_at: 3.days.ago, suspended_till: 1.day.ago)",
+        "UPDATE users SET suspended_at = now() - interval '3 days', "
+        f"suspended_till = now() - interval '1 day' WHERE id = {user_id}",
     )
     archon.members[uid]["roles"] = []
-    await sweep.sweep()
+    await swept("playtest", uid)
     assert suspended(await discourse_user("playtest", uid))
     archon.members[uid]["roles"] = ["PTC"]
-    await sweep.sweep()
+    await swept("playtest", uid)
     user = await discourse_user("playtest", uid)
     assert not suspended(user) and user["admin"]
 
@@ -152,11 +159,11 @@ async def test_a_ban_suspends_everywhere_and_its_lifting_unsuspends(archon, brow
     assert response.status_code == 403 and "suspended" in response.text
     assert suspended(await discourse_user("fr", uid))
     assert not suspended(await discourse_user("intl", uid))
-    await sweep.sweep()
+    await swept("intl", uid)
     assert suspended(await discourse_user("intl", uid))
     archon.members[uid]["sanctions"] = []
     assert (await login(browser, "fr")).json()["current_user"]
-    await sweep.sweep()
+    await swept("intl", uid)
     assert not suspended(await discourse_user("intl", uid))
 
 
@@ -164,29 +171,31 @@ async def test_a_ban_outranks_the_playtest_gate(archon, browser):
     uid = archon.member(roles=["PT"])
     await login(browser, "playtest", handle())
     archon.members[uid]["roles"] = []
-    await sweep.sweep()
+    await swept("playtest", uid)
     archon.members[uid] |= {"roles": ["PT"], "sanctions": [BAN]}
-    await sweep.sweep()
+    await swept("playtest", uid)
     user = await discourse_user("playtest", uid)
     assert suspended(user) and user["full_suspend_reason"] == discourse.BANNED
     archon.members[uid]["sanctions"] = []
-    await sweep.sweep()
+    await swept("playtest", uid)
     assert not suspended(await discourse_user("playtest", uid))
 
 
 async def test_a_lost_role_removes_its_language_groups(archon, browser):
     group = f"judge-{secrets.token_hex(3)}"
-    rails("intl", f"Group.create!(name: '{group}')")
+    created = await discourse.api("intl", "POST", "/admin/groups.json", data={"group[name]": group})
     uid = archon.member(roles=["Judge"])
     await login(browser, "intl", handle())
-    user_id = (await discourse_user("intl", uid))["id"]
-    rails("intl", f"Group.find_by(name: '{group}').add(User.find({user_id}))")
+    username = (await discourse_user("intl", uid))["username"]
+    members = f"/groups/{created['basic_group']['id']}/members.json"
+    await discourse.api("intl", "PUT", members, data={"usernames": username})
     archon.members[uid]["roles"] = ["Rulemonger"]
-    await sweep.sweep()
+    await swept("intl", uid)
     assert group in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
     archon.members[uid]["roles"] = []
-    await sweep.sweep()
+    await swept("intl", uid)
     assert group not in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
+    await discourse.api("intl", "DELETE", f"/admin/groups/{created['basic_group']['id']}.json")
 
 
 async def test_the_bridge_root_links_every_site(archon, browser):
