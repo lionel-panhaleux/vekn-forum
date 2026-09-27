@@ -60,7 +60,7 @@ categories_changed = removed.any?
 # wiki/design.md#category-icons. Discourse seeds Staff with the shield emoji; any other look is the
 # coordinator's.
 staff = Category.find_by(id: SiteSetting.staff_category_id)
-if staff && staff.icon.blank? && staff.emoji.in?([nil, "", "shield"])
+if staff&.emoji? && staff.icon.blank? && staff.emoji.in?([nil, "", "shield"])
   staff.update!(style_type: "icon", icon: "vekn-staff")
   categories_changed = true
 end
