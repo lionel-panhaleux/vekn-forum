@@ -2,8 +2,10 @@ import { apiInitializer } from "discourse/lib/api";
 
 // `[[Card Name]]` in a post shows the card's scan: on hover where there is one, on tap otherwise.
 // krcg resolves the name (English or translated, fuzzy) — card knowledge stays upstream.
-const CARD = /\[\[([^[\]\n]{2,80})\]\]/g;
+// `[pot]`, `[POT]`, `[Banu Haqim]`, `[action]` show krcg's discipline, clan or card-type icon.
+const MARK = /\[\[([^[\]\n]{2,80})\]\]|\[([A-Za-z][A-Za-z '-]{1,30})\]/g;
 const cards = new Map();
+const icons = new Map();
 
 function lookup(name) {
   const key = name.toLowerCase();
@@ -16,6 +18,33 @@ function lookup(name) {
     );
   }
   return cards.get(key);
+}
+
+// Whatever krcg serves is an icon, so the list stays krcg's: all caps asks for the superior discipline
+// first, and a tag krcg has no icon for (`[sic]`, `[edit]`) stays as typed.
+function icon(tag) {
+  const name = tag.toLowerCase().replace(/[^a-z]/g, "");
+  const sup = tag === tag.toUpperCase();
+  const key = (sup ? "^" : "") + name;
+  if (!icons.has(key)) {
+    const paths = [
+      ...(sup ? [`disc/sup/${name}`] : []),
+      `disc/inf/${name}`,
+      `clan/${name}`,
+      `icon/${name}`,
+    ].map((p) => `https://static.krcg.org/svg/${p}.svg`);
+    icons.set(
+      key,
+      Promise.all(
+        paths.map((url) =>
+          fetch(url, { method: "HEAD" })
+            .then((r) => r.ok)
+            .catch(() => false)
+        )
+      ).then((ok) => paths[ok.indexOf(true)] ?? null)
+    );
+  }
+  return icons.get(key);
 }
 
 function scan(card) {
@@ -44,17 +73,40 @@ function hide() {
   }
 }
 
+function iconNode(tag, src) {
+  const el = document.createElement("span");
+  el.className = "vekn-icon";
+  el.style.setProperty("--vekn-icon", `url("${src}")`);
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", tag);
+  el.title = tag;
+  return el;
+}
+
+// split() with MARK's two groups yields [text, card, tag, text, card, tag, …], the unmatched one undefined.
 async function decorate(text) {
-  const parts = text.data.split(CARD);
+  const parts = text.data.split(MARK);
   if (parts.length === 1) {
     return;
   }
   const found = await Promise.all(
-    parts.map((part, i) => (i % 2 ? lookup(part.trim()) : null))
+    parts.map((part, i) =>
+      part === undefined || i % 3 === 0
+        ? null
+        : i % 3 === 1
+          ? lookup(part.trim())
+          : icon(part)
+    )
   );
   const nodes = parts.map((part, i) => {
-    if (!(i % 2)) {
+    if (part === undefined) {
+      return "";
+    }
+    if (i % 3 === 0) {
       return part;
+    }
+    if (i % 3 === 2) {
+      return found[i] ? iconNode(part, found[i]) : `[${part}]`;
     }
     if (!found[i]) {
       return `[[${part}]]`;
@@ -93,13 +145,13 @@ export default apiInitializer((api) => {
   api.decorateCookedElement((element) => {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) =>
-        node.parentElement.closest("code, pre, a, .vekn-card")
+        node.parentElement.closest("code, pre, a, .vekn-card, .vekn-icon")
           ? NodeFilter.FILTER_REJECT
           : NodeFilter.FILTER_ACCEPT,
     });
     const texts = [];
     while (walker.nextNode()) {
-      if (walker.currentNode.data.includes("[[")) {
+      if (walker.currentNode.data.includes("[")) {
         texts.push(walker.currentNode);
       }
     }

@@ -12,6 +12,16 @@
   cursor: zoom-in;
 }
 
+// krcg's icon as a mask, so it takes the text's colour in light and dark alike.
+.vekn-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  background-color: currentColor;
+  mask: var(--vekn-icon) center / contain no-repeat;
+}
+
 .vekn-card-overlay {
   position: fixed;
   z-index: z("modal", "overlay");

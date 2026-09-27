@@ -68,7 +68,10 @@ light one for that reason.
 
 **Card display.** `[[Card Name]]` in a post, English or translated, shows the card's scan — in the
 site's language when krcg has it — on hover where the device hovers, and on tap (dismissed by
-another) otherwise. A name krcg does not know stays as typed; code and links are left alone.
+another) otherwise. `[pot]` shows the inferior discipline icon and `[POT]` the superior one (a
+discipline with one level shows it either way), `[brujah]` or `[Banu Haqim]` a clan's, `[action]` or
+`[ACTION]` a card type's, in the text's colour; the name shows on hover. A name or tag krcg does not
+know stays as typed; code and links are left alone.
 
 ## Category icons
 

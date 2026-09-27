@@ -29,8 +29,9 @@ run, so a deploy is its update. A site's palettes are palettes of their own, not
 re-import deletes the theme palettes its `about.json` no longer lists.
 
 **Card display resolves names through krcg's API** (`api.krcg.org/card/<name>`), in the browser
-when a post is shown: Discourse cooks nothing for it, so emails, search and excerpts show the raw
-`[[Card Name]]`.
+when a post is shown, and icon tags against krcg's icon files (`static.krcg.org/svg/…`): whatever
+krcg serves is an icon, so the list is krcg's. Discourse cooks nothing for either, so emails, search
+and excerpts show the raw `[[Card Name]]` and `[pot]`.
 
 ## Login
 
