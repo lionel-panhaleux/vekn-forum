@@ -60,12 +60,15 @@ the first sweep, and is unsuspended on both after the second.
 
 Gated by the commits "Theme every site from a shared base, and dress fr in France's tokens", "Give
 sections VEKN icons, and members a light/dark toggle" and "Show every section in the sidebar,
-unfolded, and switch chat off". In a browser, open `https://fr.forum.krcg.org` in light and dark
-system mode, then post `[[Anson]] et [[Diriger les indécis]]` in a test topic.
+unfolded, and switch chat off", and "Show krcg's discipline, clan and card-type icons for [pot],
+[POT], [brujah], [action] in posts". In a browser, open `https://fr.forum.krcg.org` in light and dark
+system mode, then post `[[Anson]] et [[Diriger les indécis]], [pot] [POT] [brujah] [action] [sic]`
+in a test topic.
 
 It worked when the header is black with the V:EKN wordmark over a red rule, the tab shows the red
 V, dark mode keeps a red (not pink) accent, and hovering each name shows its scan — the second in
-French; on a phone, a tap shows it and another dismisses it. The sidebar's foot has the light/dark
+French; on a phone, a tap shows it and another dismisses it. The four tags show their icons in
+the text's colour (production's CSP lets `static.krcg.org` through) and `[sic]` stays as typed. The sidebar's foot has the light/dark
 toggle, and a category set to a `vekn-*` icon in its settings shows it in the accent. Neither site's
 categories page lists General, Site Feedback or Uncategorized. Logged out and logged in, the sidebar
 lists every section unfolded in the categories page's order, with no "all categories" link, and
