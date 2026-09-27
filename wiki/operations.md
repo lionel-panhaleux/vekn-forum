@@ -7,6 +7,7 @@ Local dev, checks, CI and deploy.
 | recipe | meaning |
 |---|---|
 | `just discourse` | Bring up the local stack (below); idempotent, rerun after a reboot. |
+| `just bridge` | Serve the bridge to the local sites, logging in through archon beta (below). |
 | `just lint` / `just fmt` | ruff check and format. |
 | `just typecheck` | ty, warnings as errors. |
 | `just test` | pytest; needs `just discourse` up. `just test -k playtest` runs one. |
@@ -28,6 +29,15 @@ API key, the same script production runs — and writes the bridge's environment
 `.local/discourse.env`. Rerun it after changing the theme or a site's tokens. The Discourse commit it checks out is
 `discourse/ref`, production's too.
 `.local/` is gitignored; deleting it and both containers resets everything.
+
+`just bridge` serves the bridge on `localhost:8765`, where every local site's login button points,
+logging in through archon beta (`archon.krcg.org`) as yourself. It reads the local sites from
+`.local/discourse.env` and a dev archon client from `.local/archon.env` (`ARCHON_CLIENT_ID=…`,
+`ARCHON_CLIENT_SECRET=…`): registered on beta from Developer like production's, with `profile:email`
+and `api:read`, but its own client, with `http://localhost:8765/callback` as redirect URI. The role
+groups a login names are created by the sweep, which `just test` runs. It shares the port, the
+sites and the `usernames` table with `just test`: stop it before a test run, and expect to be asked
+your handle again after one.
 
 The tests serve the bridge on `localhost:8765` against those sites, and a stand-in archon on
 `127.0.0.1:8766` that speaks archon's documented contract ([dogmas.md#testing](dogmas.md#testing)).
