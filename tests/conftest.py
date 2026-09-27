@@ -6,10 +6,13 @@ alone — and nothing of the bridge's
 internals. archon itself is proven after deploy (wiki/post-deploy.md).
 """
 
+import asyncio
 import base64
 import hashlib
+import json
 import os
 import pathlib
+import re
 import secrets
 import socket
 import subprocess
@@ -19,6 +22,8 @@ import urllib.parse
 import uuid
 
 import httpx
+import psycopg
+import psycopg.sql
 import pytest
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
@@ -31,8 +36,12 @@ for line in ENV.read_text().splitlines():
     key, _, value = line.partition("=")
     os.environ[key] = value.strip('"')
 ARCHON = f"http://127.0.0.1:{8766}"
+# Beside `just bridge` (8765, database `bridge`), so a test run disturbs neither its port nor its
+# members' handles; the `archon` fixture points the sites' login at this bridge for the session.
+BRIDGE_PORT = 8767
 os.environ |= {
-    "BRIDGE_URL": "http://localhost:8765",
+    "BRIDGE_URL": f"http://localhost:{BRIDGE_PORT}",
+    "DATABASE_URL": os.environ["DATABASE_URL"].rpartition("/")[0] + "/bridge_test",
     "BRIDGE_SECRET": secrets.token_hex(16),
     "ARCHON_URL": ARCHON,
     "ARCHON_API_URL": ARCHON,
@@ -42,6 +51,7 @@ os.environ |= {
 
 # Only now: importing the bridge reads the environment set above.
 import bridge
+import bridge.discourse
 import bridge.sweep
 
 
@@ -130,22 +140,85 @@ def serve(app, port: int) -> None:
         time.sleep(0.05)
 
 
-@pytest.fixture(scope="session")
-async def archon():
-    stand_in = Archon()
-    serve(stand_in.app, 8766)
-    serve(bridge.app, 8765)
-    # The sweep looks up everyone who ever logged in: only this session's members.
+def connect_url(site: str, value: str) -> str:
+    """Point the site's login button (`discourse_connect_url`) at `value`; the previous one."""
+    url = os.environ[f"DISCOURSE_{site.upper()}_URL"] + "/admin/site_settings"
+    headers = {"Api-Key": os.environ[f"DISCOURSE_{site.upper()}_API_KEY"], "Api-Username": "system"}
+    settings = httpx.get(f"{url}.json", headers=headers, params={"filter": "discourse_connect_url"})
+    [previous] = [
+        s["value"]
+        for s in settings.raise_for_status().json()["site_settings"]
+        if s["setting"] == "discourse_connect_url"
+    ]
+    data = {"discourse_connect_url": value}
+    httpx.put(f"{url}/discourse_connect_url", headers=headers, data=data).raise_for_status()
+    return previous
+
+
+async def forget(site: str, user: dict) -> None:
+    """Delete a member a previous session created; Discourse deletes no admin or moderator."""
+    api = bridge.discourse.api
+    for right, revoke in (("admin", "revoke_admin"), ("moderator", "revoke_moderation")):
+        if user.get(right):
+            await api(site, "PUT", f"/admin/users/{user['id']}/{revoke}")
+    await api(site, "DELETE", f"/admin/users/{user['id']}.json", params={"delete_posts": "true"})
+
+
+async def reset() -> None:
+    """Forget the members and language groups tests made: the sweep reads every user of a gated
+    site, everyone who ever logged in and every language group, so leftovers slow every sweep."""
+    api = bridge.discourse.api
     async with await bridge.db() as conn:
         await conn.execute("TRUNCATE usernames")
+    for site in bridge.discourse.sites():
+        seen: set[int] = set()
+        while left := await api(
+            site, "GET", "/admin/users/list/all.json", params={"filter": "@example.com"}
+        ):
+            ids = {u["id"] for u in left}
+            assert not ids & seen, f"{site}: users {ids & seen} survived their deletion"
+            seen |= ids
+            await asyncio.gather(*(forget(site, u) for u in left))
+        found = await api(site, "GET", "/groups.json", params={"filter": "judge-"})
+        await asyncio.gather(
+            *(
+                api(site, "DELETE", f"/admin/groups/{g['id']}.json")
+                for g in found["groups"]
+                if re.fullmatch(r"judge-[0-9a-f]{6}", g["name"])
+            )
+        )
+
+
+@pytest.fixture(scope="session")
+async def archon():
+    base, _, name = os.environ["DATABASE_URL"].rpartition("/")
+    async with await psycopg.AsyncConnection.connect(f"{base}/postgres", autocommit=True) as conn:
+        if not await (
+            await conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (name,))
+        ).fetchone():
+            await conn.execute(
+                psycopg.sql.SQL("CREATE DATABASE {}").format(psycopg.sql.Identifier(name))
+            )
+    stand_in = Archon()
+    serve(stand_in.app, 8766)
+    serve(bridge.app, BRIDGE_PORT)
+    await reset()
+    bridge.sweep.PACE = 0.0  # archon's lookup budget; the stand-in has none
     await bridge.sweep.sweep()  # as after a deploy: creates the role groups
-    return stand_in
+    sites = bridge.discourse.sites()
+    dev = {
+        site: connect_url(site, f"{os.environ['BRIDGE_URL']}/discourse/{site}") for site in sites
+    }
+    yield stand_in
+    for site, url in dev.items():
+        connect_url(site, url)
 
 
 @pytest.fixture
 async def browser():
     async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
         yield client
+    await reset()
 
 
 async def login(
@@ -169,12 +242,46 @@ async def discourse_user(site: str, uid: str) -> dict:
     return await bridge.discourse.user(site, found["id"])
 
 
+# Rails boots in ~10 s: one runner for the whole session, started at import so it boots while the
+# session sets up, evaluating each snippet on the named site's database.
+RUNNER = subprocess.Popen(
+    ["docker", "exec", "-i", "-u", "discourse", "-w", "/src", "vekn-forum-discourse"]
+    + [
+        "bundle",
+        "exec",
+        "rails",
+        "runner",
+        """
+STDOUT.sync = true
+STDIN.each_line do |line|
+  site, code = JSON.parse(line)
+  out = StringIO.new
+  $stdout = out
+  error = begin
+    RailsMultisite::ConnectionManagement.with_connection(site) { eval(code) }
+    nil
+  rescue Exception => e
+    "#{e.class}: #{e.message}"
+  ensure
+    $stdout = STDOUT
+  end
+  STDOUT.puts({out: out.string, error: error}.to_json)
+end
+""",
+    ],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    text=True,
+)
+
+
 def rails(site: str, code: str) -> str:
     """Server-side Discourse, as the phpBB importer would act on it."""
-    return subprocess.run(
-        ["docker", "exec", "-u", "discourse", "-w", "/src", "-e", f"RAILS_DB={site}"]
-        + ["vekn-forum-discourse", "bundle", "exec", "rails", "runner", code],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    assert RUNNER.stdin and RUNNER.stdout
+    RUNNER.stdin.write(json.dumps([site, code]) + "\n")
+    RUNNER.stdin.flush()
+    while not (line := RUNNER.stdout.readline()).startswith('{"out":'):
+        assert line, "the Rails runner exited"
+    reply = json.loads(line)
+    assert not reply["error"], reply["error"]
+    return reply["out"].strip()

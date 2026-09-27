@@ -35,12 +35,15 @@ logging in through archon beta (`archon.krcg.org`) as yourself. It reads the loc
 `.local/discourse.env` and a dev archon client from `.local/archon.env` (`ARCHON_CLIENT_ID=…`,
 `ARCHON_CLIENT_SECRET=…`): registered on beta from Developer like production's, with `profile:email`
 and `api:read`, but its own client, with `http://localhost:8765/callback` as redirect URI. The role
-groups a login names are created by the sweep, which `just test` runs. It shares the port, the
-sites and the `usernames` table with `just test`: stop it before a test run, and expect to be asked
-your handle again after one.
+groups a login names are created by the sweep, which `just test` runs.
 
-The tests serve the bridge on `localhost:8765` against those sites, and a stand-in archon on
-`127.0.0.1:8766` that speaks archon's documented contract ([dogmas.md#testing](dogmas.md#testing)).
+The tests serve their own bridge on `localhost:8767`, with its own database (`bridge_test`), and a
+stand-in archon on `127.0.0.1:8766` that speaks archon's documented contract
+([dogmas.md#testing](dogmas.md#testing)), so `just bridge` can stay up through a run. They share the
+sites: for the run, each site's login button points at the test bridge, and is pointed back after —
+a killed run leaves it there until the next run or `just discourse`. Before a run and after each
+login test they delete the members (`@example.com`) and language groups tests create, since the
+sweep reads every one of them.
 
 ## Bridge
 

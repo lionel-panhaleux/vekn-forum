@@ -112,7 +112,7 @@ async def test_a_member_without_a_verified_email_is_sent_to_archon(archon, brows
 
 async def test_a_forged_login_request_is_refused(archon, browser):
     response = await browser.get(
-        "http://localhost:8765/discourse/fr", params={"sso": "bm9uY2U9MQ==", "sig": "0" * 64}
+        f"{os.environ['BRIDGE_URL']}/discourse/fr", params={"sso": "bm9uY2U9MQ==", "sig": "0" * 64}
     )
     assert response.status_code == 403
 
@@ -189,8 +189,8 @@ async def test_a_lost_role_removes_its_language_groups(archon, browser):
     assert group not in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
 
 
-async def test_the_bridge_root_links_every_site(browser):
-    response = await browser.get("http://localhost:8765/", headers={"accept-language": "fr"})
+async def test_the_bridge_root_links_every_site(archon, browser):
+    response = await browser.get(os.environ["BRIDGE_URL"], headers={"accept-language": "fr"})
     assert response.status_code == 200
     assert "Forums VEKN" in response.text
     for site in discourse.sites():
