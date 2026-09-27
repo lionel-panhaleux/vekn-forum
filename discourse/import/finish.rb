@@ -59,7 +59,12 @@ legacy_users.where("admin OR moderator").find_each do |user|
   user.update!(admin: false, moderator: false)
   puts "revoked the phpBB rights of #{user.username}"
 end
-UserOption.where(user_id: legacy_users.select(:id)).update_all(email_digests: false)
+UserOption.where(user_id: legacy_users.select(:id)).update_all(
+  email_digests: false,
+  email_level: UserOption.email_level_types[:never],
+  email_messages_level: UserOption.email_level_types[:never],
+  mailing_list_mode: false,
+)
 
 # The importer fails to create a second phpBB account with an address already taken, and gives its
 # posts to the system user: they go to the account holding that address.
@@ -106,7 +111,27 @@ Post
   .where(post_custom_fields: { name: "import_id", value: hidden })
   .find_each { PostDestroyer.new(Discourse.system_user, it, context: "hidden in phpBB").destroy }
 
-Group.joins(:_custom_fields).where(group_custom_fields: { name: "import_id" }).destroy_all
+names = settings["vekn"]["groups"]
+phpbb_names = mysql.query("SELECT group_id, group_name FROM #{db["table_prefix"]}groups").to_h { [it["group_id"], it["group_name"]] }
+Group
+  .joins(:_custom_fields)
+  .where(group_custom_fields: { name: "import_id" })
+  .find_each do |group|
+    id = group.custom_fields["import_id"].to_i
+    next group.destroy! if !names[id]
+    group.update!(
+      name: names[id],
+      full_name: phpbb_names.fetch(id),
+      visibility_level: Group.visibility_levels[:members],
+      members_visibility_level: Group.visibility_levels[:members],
+    )
+  end
+
+settings["vekn"]["restricted"].each do |forum_id, spec|
+  category = Category.find(imported.fetch(forum_id.to_s))
+  category.set_permissions(spec["groups"].to_h { [it, :full] })
+  category.save!
+end
 
 # The web processes cache categories per locale; this clears only this process's.
 I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }

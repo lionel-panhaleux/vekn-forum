@@ -14,7 +14,8 @@ end
 # child forums there.
 vekn["sections"].each { |forum_id, slug| tag.(section.(slug), forum_id) }
 
-# Created before any topic lands, so a private board is never public, even for a moment.
+# Created before any topic lands, so a private board is never public, even for a moment; finish.rb
+# opens it to its groups once the importer has created them.
 vekn["restricted"].each do |forum_id, spec|
   next if CategoryCustomField.exists?(name: "import_id", value: forum_id.to_s)
   parent = section.(spec["parent"])
@@ -29,7 +30,7 @@ vekn["restricted"].each do |forum_id, spec|
       color: parent.color,
       text_color: parent.text_color,
     )
-  category.set_permissions(spec["groups"].to_h { [it, :full] })
+  category.set_permissions(staff: :full)
   category.save!
   tag.(category, forum_id)
 end

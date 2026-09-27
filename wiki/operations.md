@@ -67,21 +67,28 @@ half for vekn.fr.
 What the forum becomes:
 
 - **Boards.** Each public board goes into the site's section of its kind (`vekn.sections`) or is
-  merged into one (`category_mappings`); the six regional boards become subcategories of Domaines de
-  France, with its icon. The private boards become restricted subcategories, created before any
-  topic lands so they are never public: Sujets supprimés (staff), Conclave V:EKN de Paris (staff),
-  Conclave V:EKN France (logged-in members, as phpBB's registered users). Playtest Ind is not
-  imported: its NDA content belongs to the playtest site.
+  merged into one (`category_mappings`); the six regional boards and the four archived ones become
+  subcategories of Domaines de France and Archives, with their icon. The private boards become
+  restricted subcategories (`vekn.restricted`), staff-only from before any topic lands so they are
+  never public, then opened to the groups phpBB granted them — archon's role group in place of
+  phpBB's copy of a role: Sujets supprimés, Conclave V:EKN de Paris, Conclave V:EKN France, and
+  Playtest Ind, whose NDA content only PT and PTC holders read.
+- **Groups.** phpBB's groups are kept under the names `vekn.groups` gives them, members and owners
+  included, each visible to its members and staff: they are the coordinator's
+  ([engine.md#model-mapping](engine.md#model-mapping)). Those copying an archon role (Judges, Prince,
+  Playtest) are not.
 - **Members.** Every phpBB account, with its email: the legacy claim of
   [engine.md#login](engine.md#login). A member who logged in before the import is given their phpBB
-  account's posts. Until claimed, an account keeps no phpBB admin or moderator right and gets no
-  digest. phpBB's groups are not carried over: roles are archon's. A guest's posts go to a suspended
-  placeholder. Two phpBB accounts with one address become one.
+  account's posts. Until claimed, an account keeps no phpBB admin or moderator right and is sent no
+  mail at all: a reply to a years-old topic would otherwise mail its author's old address; a claimed
+  member turns mail back on in their preferences. A guest's posts go to a suspended placeholder. Two
+  phpBB accounts with one address become one.
 - **Posts.** The importer turns BBCode into Markdown; `finish.rb` turns the card tag into
   `[[Card Name]]` and the discipline and clan smilies (`:pot:`, `:!bruj:`) into icon tags
   (`vekn.disciplines`, `vekn.clans`), deletes again what phpBB had hidden, and points in-post links to
   the old forum at their new topics. A post whose phpBB account was deleted stays the system user's.
-  Private messages are not imported, nor attachments and avatars, whose files the dump lacks.
+  Private messages are not imported, since any admin of the site could read them, nor attachments
+  and avatars, whose files the dump lacks.
 - **Old URLs.** `/forum/viewforum.php?f=`, `/forum/viewtopic.php?t=` and `?p=` redirect to their
   category, topic and post on the site, through permalinks stored without `forum/` and the
   `permalink_normalizations` site setting the importer writes to strip it; `www.vekn.fr/forum/`

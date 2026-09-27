@@ -15,6 +15,7 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Playtest community | Its own site, NDA content isolated in its own database. Two locks: the bridge admits only PT and PTC holders to it, and every category's security grants the `pt` and `ptc` role groups only, `everyone` removed. `login_required`, not indexed. |
 | Coordinator | `admin` on their community's site: an NC on the site of their archon `country`, ICs on the international site, **every PTC** on the playtest site. *(Decided 2026-09-26.)* |
 | Section | A category (subcategories for cities under a region), plus its **section group**, which watches the category's first posts by default. Playgroup groups are open to join; language groups (`pt-fr`, `judge-fi`, …) are added to by their owner only, and their category is visible to that group alone. |
+| Community group (an association's members, organizers) | A Discourse group of the site, created and filled by its coordinator, facts archon does not hold; a private category is opened to it. A group only a role's holders may join is named with that role's prefix (below), or the category is opened to the role's group itself. |
 | Section lead | Owner of the section group, and in the category's moderating group — both set by the coordinator. Owning a group needs no admin. |
 | Judges | A section of the international site, moderated by Rulemongers; its language groups are created by an IC. |
 | Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
@@ -76,7 +77,8 @@ VEKN ban** ([product.md](product.md#scope)) — a member archon holds an Ethics 
 `suspension` with no end date) is refused at login and suspended on every site where they have an
 account, and lifting the ban in archon lifts it; and **removal from language groups** when the role
 that gates them is lost — `pt-*` needs PT or PTC, `judge-*` needs Judge or Rulemonger; it finds them
-through the Discourse API by that prefix, so a language group must carry it. Archon decides who may
+through the Discourse API by that prefix, so a language group must carry it — and any other group
+with that prefix, on any site, is kept to the same roles' holders. Archon decides who may
 be in a language group, its owner decides which language. The bridge lifts only suspensions
 carrying one of its own two reasons, a ban's outranking the gate's, so regaining PT while banned
 lifts nothing; a moderator's suspension is never touched. A member with no VEKN ID has no public API

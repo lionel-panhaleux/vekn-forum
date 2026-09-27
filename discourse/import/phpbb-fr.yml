@@ -15,23 +15,18 @@ database:
 import:
   site_name:
   new_categories: []
-  # Every forum not listed here is created by the importer under its parent's category: the regions'
-  # six boards under Domaines de France.
+  # Every forum not listed here is created by the importer under its parent's category: the six
+  # regional boards under Domaines de France, the four archived ones under Archives.
   category_mappings:
     - { source_category_id: 41, skip: true } # VTES: a container
     - { source_category_id: 42, skip: true } # V:EKN France: a container
     - { source_category_id: 46, skip: true } # Old Stuff: a container
     - { source_category_id: 48, skip: true } # JDR: a container
-    - { source_category_id: 38, skip: true } # Playtest Ind: NDA, the playtest group only
     - { source_category_id: 40, target_category_id: 6 } # Kindred Network → Le jeu
     - { source_category_id: 51, target_category_id: 24 } # Le coin des artistes → Hors-sujet
     - { source_category_id: 39, target_category_id: 24 } # JDR World of Darkness → Hors-sujet
     - { source_category_id: 37, target_category_id: 24 } # Netrunner → Hors-sujet
     - { source_category_id: 18, target_category_id: 7 } # Listes d'échanges → Échanges
-    - { source_category_id: 49, target_category_id: 45 } # Bibliodèque → Archives
-    - { source_category_id: 19, target_category_id: 45 } # Decks et Stratégie → Archives
-    - { source_category_id: 21, target_category_id: 45 } # Débriefs → Archives
-    - { source_category_id: 34, target_category_id: 45 } # Bac à sable → Archives
     - { source_category_id: 52, target_category_id: 10 } # Démonstrations (Démo group) → Sujets supprimés
     - { source_category_id: 50, target_category_id: 10 } # the rest of Sujets supprimés, admins only in phpBB
     - { source_category_id: 26, target_category_id: 10 }
@@ -79,11 +74,29 @@ vekn:
     29: association
     24: offtopic
     45: archives
-  # phpBB forum → a new subcategory of a section, readable only by the groups named.
+  # phpBB forum → a new subcategory of a section, readable only by the groups named: the groups phpBB
+  # granted it, an archon role's group in place of phpBB's copy of that role.
   restricted:
-    10: { name: Sujets supprimés, slug: deleted, parent: archives, groups: [staff] }
-    2: { name: Conclave V:EKN de Paris, slug: conclave-paris, parent: regions, groups: [staff] }
-    13: { name: Conclave V:EKN France, slug: conclave, parent: association, groups: [trust_level_0] }
+    10: { name: Sujets supprimés, slug: deleted, parent: archives, groups: [staff, vekn-france, prince, judge] }
+    38: { name: Playtest Ind, slug: playtest, parent: archives, groups: [staff, pt, ptc] }
+    2: { name: Conclave V:EKN de Paris, slug: conclave-paris, parent: regions, groups: [staff, vekn-paris] }
+    13: { name: Conclave V:EKN France, slug: conclave, parent: association, groups: [staff, vekn-france, alastors] }
+  # phpBB group → its name on the site, visible to its members and staff; a group not listed is not
+  # kept: Judges, Prince and Playtest copied archon roles.
+  groups:
+    167: vekn-paris
+    171: vekn-rhone-alpes
+    172: vekn-sud-est
+    178: vekn-nord-est
+    179: vekn-nord-ouest
+    205: vekn-sud-ouest
+    238: vekn-france
+    679: asso-vekn-france
+    805: moderateurs
+    1308: archetypes
+    1352: ec-2010
+    1443: alastors
+    1561: demo
   # phpBB smilies drawing VTES icons (their images are not in the dump) → the icon tag naming it
   # (wiki/design.md#theming): a discipline's code is its tag, capitalised for superior.
   disciplines: [abo, ani, aus, cel, chi, dai, dem, dom, for, mel, myt, nec, obe, obf, obt, pot, pre, pro, qui, san, ser, spi, tem, tha, thn, val, vic, vis]
