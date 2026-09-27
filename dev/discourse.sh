@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Local Discourse multisite (fr, intl, playtest) in production mode, and the bridge's Postgres — see
-# wiki/operations.md. Idempotent: re-running converges. Writes the bridge's per-site env to
-# .local/discourse.env, keeping each site's secret and API key across runs.
+# The local stack — wiki/operations.md#local-stack. Idempotent: re-running converges.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -23,8 +21,7 @@ git -C "$SRC" checkout --quiet "$REF"
     done
 } > "$SRC/config/multisite.yml"
 
-# Production mode: no code reloading, precompiled assets that Rails serves itself (no nginx here),
-# and no per-IP blocking of the bridge and the tests, which hit every site from one address.
+# Per-IP limits off: the bridge and the tests reach every site from one address.
 run() {
     docker exec -u discourse:discourse -w /src \
         -e RAILS_ENV=production \
