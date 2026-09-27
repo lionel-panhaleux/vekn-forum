@@ -76,7 +76,14 @@ another) otherwise. A name krcg does not know stays as typed; code and links are
 (`theme/assets/icons.svg`) draws them as filled silhouettes beside VTES's own symbols. A category
 takes its kind's icon, drawn in the palette's accent whatever the category's colour, so it follows
 light and dark: the icons tell sections apart, not colours. A new kind of section is a new
-icon here, for every site.
+icon here, for every site. Every icon is in the category icon picker of every site, under `vekn`.
+
+**A new site starts with its sections.** A site's identity (`discourse/sites/<site>/identity.json`)
+lists them in order, each a name in the site's language and a slug naming its kind in English, as
+code stays English; the slug gives the icon. Provisioning creates them while the site has no
+category of its own besides Uncategorized and Staff; after that they are the coordinator's, so a
+renamed, reordered or deleted section stays so. Staff keeps Discourse's permissions, admins and
+moderators, and takes its own icon.
 
 | Kind of section | Icon | Figure |
 |---|---|---|
@@ -96,6 +103,7 @@ icon here, for every site.
 
 ## Sidebar
 
+| Staff | `vekn-staff` | Ventrue's sword and sceptre |
 **Every section is in the sidebar, unfolded, in the coordinator's order**, for visitors and members
 alike, while a site has at most 15 top-level sections: nothing to open to find one, and no per-
 member list to curate. The categories page stays reachable from the list's tabs (a dropdown on a

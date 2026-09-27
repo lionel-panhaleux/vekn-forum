@@ -55,10 +55,13 @@ removed =
     end
     category.reload.destroy!
   end
-if removed.any?
-  # The web processes cache categories per locale; a destroy here clears only this process's.
-  I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
-  Site.clear_anon_cache!
+categories_changed = removed.any?
+
+# Staff keeps Discourse's own permissions, admins (from archon) and moderators, and takes its kind's icon.
+staff = Category.find_by(id: SiteSetting.staff_category_id)
+if staff && staff.style_type != "icon"
+  staff.update!(style_type: "icon", icon: "vekn-staff")
+  categories_changed = true
 end
 
 # The base theme (wiki/design.md#theming), re-imported from its directory on every run; found by
@@ -93,6 +96,25 @@ if (dir = ENV["SITE_IDENTITY_DIR"])
     [light, dark].each(&:save!)
     ColorScheme.publish_discourse_stylesheets!
   end
+  # A new site's sections (wiki/design.md#category-icons), created while it has none of its own: after
+  # that they are the coordinator's, so a renamed or deleted one stays so.
+  own = Category.where(parent_category_id: nil).where.not(id: [uncategorized.id, staff&.id].compact)
+  if identity["sections"] && !own.exists?
+    position = Category.maximum(:position).to_i
+    identity["sections"].each do |section|
+      Category.create!(
+        name: section["name"],
+        slug: section["slug"],
+        user: Discourse.system_user,
+        style_type: "icon",
+        icon: "vekn-#{section["slug"]}",
+        color: identity["palettes"]["light"]["tertiary"],
+        text_color: "FFFFFF",
+        position: position += 1,
+      )
+    end
+    categories_changed = true
+  end
   %w[logo logo_small large_icon].each do |setting|
     # UploadCreator optimizes the image beside its source: hand it a copy in a writable place.
     Tempfile.create([setting, ".png"]) do |file|
@@ -104,3 +126,9 @@ if (dir = ENV["SITE_IDENTITY_DIR"])
   end
 end
 theme.update!(color_scheme: light, dark_color_scheme: dark)
+
+if categories_changed
+  # The web processes cache categories per locale; a change here clears only this process's.
+  I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
+  Site.clear_anon_cache!
+end
