@@ -146,7 +146,7 @@ async function decorate(text) {
   text.replaceWith(...nodes);
 }
 
-// The composer's picker writes the markup above: krcg completes card names in the site's language, and
+// The composer's picker writes the markup above: krcg completes card names in the interface's language, and
 // static.krcg.org's directory listings (served on purpose, CORS-open) are the icon list, so it stays krcg's.
 const SVG = "https://static.krcg.org/svg";
 let picks;

@@ -67,14 +67,14 @@ WCAG AA (4.5:1) against its palette's background: France's dark accent is a ligh
 light one for that reason.
 
 **Card display.** `[[Card Name]]` in a post, English or translated, shows the card's scan — in the
-site's language when krcg has it — on hover where the device hovers, and on tap (dismissed by
-another) otherwise. `[pot]` shows the inferior discipline icon and `[POT]` the superior one (a
+reader's interface language when krcg has it — on hover where the device hovers, and on tap
+(dismissed by another) otherwise. `[pot]` shows the inferior discipline icon and `[POT]` the superior one (a
 discipline with one level shows it either way), `[brujah]` or `[Banu Haqim]` a clan's, `[action]` or
 `[ACTION]` a card type's, in the text's colour; the name shows on hover. A name or tag krcg does not
 know stays as typed; code and links are left alone.
 
 **Writing them.** One button in the composer's toolbar opens a picker with a single field: it
-completes card names in the site's language and narrows a grid of every icon krcg serves; a pick
+completes card names in the writer's interface language and narrows a grid of every icon krcg serves; a pick
 writes `[[Card Name]]` or the icon's tag at the cursor. *(Decided 2026-09-27: a toolbar button,
 not an entry in the `⊕` menu — naming cards is the core act of a rules question, worth the element.)*
 
