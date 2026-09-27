@@ -34,6 +34,10 @@ vekn["restricted"].each do |forum_id, spec|
   tag.(category, forum_id)
 end
 
+# The web processes cache categories per locale; this clears only this process's.
+I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
+Site.clear_anon_cache!
+
 # The importer creates a user only when no account has their email, and fails otherwise: a member
 # who logged in before the import takes their phpBB account's import_id, so its posts become theirs —
 # the same email match as the legacy claim (wiki/engine.md#login).

@@ -23,7 +23,6 @@ merged = settings["import"]["category_mappings"].select { it["target_category_id
     Permalink.create!(url: url, category_id: imported.fetch(target_id.to_s)) if !Permalink.find_by_url(url)
   end
 
-# wiki/design.md#category-icons: a board the importer created takes its section's icon.
 Category
   .where(id: imported.values, style_type: Category.style_types[:square])
   .where.not(parent_category_id: nil)
@@ -47,17 +46,12 @@ Post
       post.raw.gsub(legacy) do |link|
         Permalink.find_by_url("forum/#{CGI.unescapeHTML($1)}")&.target_url || link
       end
-    # The old site's card tag (krcg.js drew it as span.krcg-card) and icon smilies become
-    # wiki/design.md#theming's card display.
     raw = raw.gsub(%r{\[card\](.+?)\[/card\]}i, '[[\1]]').gsub(smiley) { "[#{icons.fetch($1)}]" }
     next if raw == post.raw
     post.update_columns(raw: raw)
     post.rebake!
   end
 
-# Rights are the bridge's (wiki/engine.md#login), and an imported account has not logged in through
-# it: a phpBB admin or moderator keeps neither, and a legacy address gets no digest of a forum its
-# owner has not joined.
 legacy_users =
   User.real.joins(:_custom_fields).where(user_custom_fields: { name: "import_id" })
     .where.missing(:single_sign_on_record)
@@ -112,5 +106,8 @@ Post
   .where(post_custom_fields: { name: "import_id", value: hidden })
   .find_each { PostDestroyer.new(Discourse.system_user, it, context: "hidden in phpBB").destroy }
 
-# Roles are archon's (wiki/dogmas.md#data): phpBB's groups are not carried over.
 Group.joins(:_custom_fields).where(group_custom_fields: { name: "import_id" }).destroy_all
+
+# The web processes cache categories per locale; this clears only this process's.
+I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
+Site.clear_anon_cache!

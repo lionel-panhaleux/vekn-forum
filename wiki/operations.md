@@ -56,13 +56,13 @@ start of a run, as the first sweep after a deploy does.
 
 `just import-phpbb <dump.sql>` imports vekn.fr's phpBB 3.3 into the local fr site
 (`discourse/import/run.sh`; `run.sh <dump> app /var/www/discourse` on a launcher host). It loads the
-dump's `phpbb3_` tables into a throwaway MariaDB (container `vekn-phpbb`, network `vekn-import`), then
+dump's `phpbb3_` tables into a MariaDB (container `vekn-phpbb`, network `vekn-import`) created for
+the run and removed after it, since it holds every member's email, then
 runs in the Discourse container, on the fr database: `prepare.rb`, Discourse's own
 `script/import_scripts/phpbb3.rb` with `phpbb-fr.yml`, then `finish.rb`. Every imported record keeps
 its phpBB id (`import_id`), so a re-run with a fresher dump adds only what is new. The bundle is
-Discourse's plus `mysql2` (`discourse/import/Gemfile`): Discourse's own `IMPORT=1` bundle declares
-sqlite3 twice at our ref. About 1,700 posts a minute, an hour and a half for vekn.fr. `docker rm -f
-vekn-phpbb` drops the dump's copy afterwards: it holds every member's email.
+Discourse's plus `mysql2` (`discourse/import/Gemfile`). About 1,700 posts a minute, an hour and a
+half for vekn.fr.
 
 What the forum becomes:
 
@@ -83,7 +83,8 @@ What the forum becomes:
   the old forum at their new topics. A post whose phpBB account was deleted stays the system user's.
   Private messages are not imported, nor attachments and avatars, whose files the dump lacks.
 - **Old URLs.** `/forum/viewforum.php?f=`, `/forum/viewtopic.php?t=` and `?p=` redirect to their
-  category, topic and post on the site; `www.vekn.fr/forum/` does only once vekn.fr sends `/forum/` to
+  category, topic and post on the site, through permalinks stored without `forum/` and the
+  `permalink_normalizations` site setting the importer writes to strip it; `www.vekn.fr/forum/` does only once vekn.fr sends `/forum/` to
   it ([product.md#rollout](product.md#rollout)).
 
 ## Bridge

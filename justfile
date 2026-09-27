@@ -41,7 +41,7 @@ typecheck:
 
 # vekn.fr's phpBB dump into the local fr site; needs `just dev` up.
 import-phpbb dump:
-    discourse/import/run.sh {{ dump }}
+    discourse/import/run.sh "{{ dump }}"
 
 # Needs `just dev` up.
 test *args:
