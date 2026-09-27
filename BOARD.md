@@ -22,4 +22,4 @@ follow-up ("chase @lip, 12 Sep"), owned by whoever wrote it.
 - Console — a plugin page where each coordinator and section-lead job in `wiki/product.md#personas` meets `wiki/design.md#time-savers-land-first` and `#mobile-first`, contents fixed by a first `/product scout`. Doc-impact: design.md, product.md, engine.md.
 - Listmonk — self-hosted per server-setup; every list mirrors a Discourse group, kept in sync by the bridge; a coordinator or section lead manages only their groups' lists. Doc-impact: product.md, engine.md, operations.md.
 
-<!-- cycles-since-upkeep: 7 -->
+<!-- cycles-since-upkeep: 8 -->

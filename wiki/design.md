@@ -94,6 +94,14 @@ icon here, for every site.
 | Playtest | `vekn-playtest` | masquerade mask |
 | Judges | `vekn-judges` | Auspex's eye |
 
+## Sidebar
+
+**Every section is in the sidebar, unfolded, in the coordinator's order**, for visitors and members
+alike, while a site has at most 15 top-level sections: nothing to open to find one, and no per-
+member list to curate. The categories page stays reachable from the list's tabs (a dropdown on a
+phone), so the sidebar drops its link to it. Past 15, Discourse's own sidebar returns, each member's
+saved list with it.
+
 ## Console
 
 **A single mobile-first page, from our plugin, for the coordinator's and section lead's recurring

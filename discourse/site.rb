@@ -29,8 +29,10 @@ ApiKey.find_or_create_by!(description: "bridge", key_hash: hash) do |k|
   k.created_by_id = Discourse::SYSTEM_USER_ID
 end
 SiteSetting.enable_powered_by_discourse = false
+SiteSetting.chat_enabled = false
 SiteSetting.interface_color_selector = "sidebar_footer"
 SiteSetting.allow_uncategorized_topics = false
+SiteSetting.fixed_category_positions = true
 
 # Discourse seeds General and Site Feedback until a human joins; they serve no section
 # (wiki/design.md#cut). Removed while only the system has posted there: its topics go to the trash, via

@@ -61,3 +61,18 @@
   min-width: 44px;
   min-height: 44px;
 }
+
+// Sections shown whole (sidebar.gjs): no fold, no editing the list (a new category starts from the
+// categories page), and the list is that page's content, so no link to it.
+.vekn-sidebar-sections .sidebar-section[data-section-name="categories"] {
+  .sidebar-section-header-collapsable {
+    pointer-events: none;
+  }
+
+  .sidebar-section-header-caret,
+  .sidebar-section-header-button,
+  .sidebar-section-header-dropdown,
+  [data-link-name="all-categories"] {
+    display: none;
+  }
+}
