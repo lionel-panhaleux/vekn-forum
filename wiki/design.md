@@ -73,6 +73,11 @@ discipline with one level shows it either way), `[brujah]` or `[Banu Haqim]` a c
 `[ACTION]` a card type's, in the text's colour; the name shows on hover. A name or tag krcg does not
 know stays as typed; code and links are left alone.
 
+**Writing them.** One button in the composer's toolbar opens a picker with a single field: it
+completes card names in the site's language and narrows a grid of every icon krcg serves; a pick
+writes `[[Card Name]]` or the icon's tag at the cursor. *(Decided 2026-09-27: a toolbar button,
+not an entry in the `⊕` menu — naming cards is the core act of a rules question, worth the element.)*
+
 ## Category icons
 
 **A category's icon names its kind of section, the same on every site**; the base theme's sprite

@@ -30,7 +30,10 @@ re-import deletes the theme palettes its `about.json` no longer lists.
 
 **Card display resolves names through krcg's API** (`api.krcg.org/card/<name>`), in the browser
 when a post is shown, and icon tags against krcg's icon files (`static.krcg.org/svg/…`): whatever
-krcg serves is an icon, so the list is krcg's. Discourse cooks nothing for either, so emails, search
+krcg serves is an icon, so the list is krcg's. The composer's picker completes names through
+`api.krcg.org/complete/<prefix>` (in the site's language by `Accept-Language`) and reads the icon list
+from the directory listings of `static.krcg.org/svg/{disc/inf,disc/sup,clan,icon}/`, which
+server-setup serves on purpose, CORS-open — an nginx listing, not a krcg API. Discourse cooks nothing for either, so emails, search
 and excerpts show the raw `[[Card Name]]` and `[pot]`.
 
 ## Login
