@@ -33,16 +33,24 @@ SiteSetting.interface_color_selector = "sidebar_footer"
 SiteSetting.allow_uncategorized_topics = false
 
 # Discourse seeds General and Site Feedback until a human joins; they serve no section
-# (wiki/design.md#cut). Removed while only the system has posted there: its welcome topics go to the trash.
-%w[general_category_id meta_category_id].each do |setting|
-  category = Category.find_by(id: SiteSetting.get(setting)) or next
-  topics = Topic.with_deleted.where(category_id: category.id).where.not(id: category.topic_id)
-  next if topics.where.not(user_id: Discourse::SYSTEM_USER_ID).exists?
-  topics.find_each do |topic|
-    topic.update_columns(category_id: SiteSetting.uncategorized_category_id)
-    PostDestroyer.new(Discourse.system_user, topic.first_post, context: "site provisioning").destroy if !topic.deleted_at
+# (wiki/design.md#cut). Removed while only the system has posted there: its topics go to the trash, via
+# Uncategorized, which Discourse lists like any other category when this setting has lost it.
+uncategorized = Category.find_by(id: SiteSetting.uncategorized_category_id)
+raise "uncategorized_category_id #{SiteSetting.uncategorized_category_id} names no category" if !uncategorized
+removed =
+  %w[general_category_id meta_category_id].filter_map do |setting|
+    category = Category.find_by(id: SiteSetting.get(setting)) or next
+    topics = Topic.with_deleted.where(category_id: category.id).where.not(id: category.topic_id)
+    posts = Post.with_deleted.where(topic_id: topics.select(:id))
+    next if posts.where.not(user_id: Discourse::SYSTEM_USER_ID).exists?
+    topics.find_each do |topic|
+      topic.update_columns(category_id: uncategorized.id)
+      next if topic.deleted_at
+      PostDestroyer.new(Discourse.system_user, topic.first_post, context: "site provisioning").destroy
+    end
+    category.reload.destroy!
   end
-  category.reload.destroy!
+if removed.any?
   # The web processes cache categories per locale; a destroy here clears only this process's.
   I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
   Site.clear_anon_cache!

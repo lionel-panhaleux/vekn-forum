@@ -52,7 +52,7 @@
 }
 
 // A section's icon wears the palette's accent, so it follows light and dark (wiki/design.md#category-icons).
-.badge-category .d-icon[class*="d-icon-vekn-"] {
+.d-icon[class*="d-icon-vekn-"] {
   color: var(--tertiary);
 }
 
