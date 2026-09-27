@@ -49,7 +49,6 @@ os.environ |= {
 # Only now: importing the bridge reads the environment set above.
 import bridge
 import bridge.discourse
-import bridge.sweep
 
 
 class Archon:
@@ -137,19 +136,16 @@ def serve(app, port: int) -> None:
         time.sleep(0.05)
 
 
-def connect_url(site: str, value: str) -> str:
-    """Point the site's login button (`discourse_connect_url`) at `value`; the previous one."""
-    url = os.environ[f"DISCOURSE_{site.upper()}_URL"] + "/admin/site_settings"
-    headers = {"Api-Key": os.environ[f"DISCOURSE_{site.upper()}_API_KEY"], "Api-Username": "system"}
-    settings = httpx.get(f"{url}.json", headers=headers, params={"filter": "discourse_connect_url"})
-    [previous] = [
-        s["value"]
-        for s in settings.raise_for_status().json()["site_settings"]
-        if s["setting"] == "discourse_connect_url"
-    ]
-    data = {"discourse_connect_url": value}
-    httpx.put(f"{url}/discourse_connect_url", headers=headers, data=data).raise_for_status()
-    return previous
+async def point_login(site: str, bridge_url: str) -> None:
+    """Point the site's login button (`discourse_connect_url`) at a bridge."""
+    env = bridge.discourse.env
+    async with httpx.AsyncClient(base_url=env(site, "URL"), timeout=30) as client:
+        response = await client.put(
+            "/admin/site_settings/discourse_connect_url",
+            headers={"Api-Key": env(site, "API_KEY"), "Api-Username": "system"},
+            data={"discourse_connect_url": f"{bridge_url}/discourse/{site}"},
+        )
+    response.raise_for_status()  # an empty body, which `bridge.discourse.api` would parse
 
 
 @pytest.fixture(scope="session")
@@ -165,15 +161,19 @@ async def archon():
     stand_in = Archon()
     serve(stand_in.app, 8766)
     serve(bridge.app, BRIDGE_PORT)
+    # `reach` reads everyone who ever logged in: this session's members only.
+    async with await bridge.db() as conn:
+        await conn.execute("TRUNCATE usernames")
     sites = bridge.discourse.sites()
-    for site in sites:
-        await bridge.discourse.create_role_groups(site)  # as the first sweep after a deploy
-    dev = {
-        site: connect_url(site, f"{os.environ['BRIDGE_URL']}/discourse/{site}") for site in sites
-    }
-    yield stand_in
-    for site, url in dev.items():
-        connect_url(site, url)
+    try:
+        for site in sites:
+            await bridge.discourse.create_role_groups(site)  # as the first sweep after a deploy
+            await point_login(site, os.environ["BRIDGE_URL"])
+        yield stand_in
+    finally:
+        # Back to `just dev`'s bridge, whatever a killed run left.
+        for site in sites:
+            await point_login(site, "http://localhost:8765")
 
 
 @pytest.fixture

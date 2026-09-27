@@ -26,21 +26,28 @@ async def sweep() -> None:
             members[uid] = await archon.member(uid, token)
         return members[uid]
 
+    targets, failed = await reach(lookup)
+    for site, user_id in sorted(targets):
+        try:
+            await push(site, user_id, lookup)
+        except Exception:
+            failed = True
+            logger.exception("%s: user %s failed", site, user_id)
+    if failed:
+        raise SystemExit(1)
+
+
+async def reach(lookup: Callable[[str], Awaitable[dict]]) -> tuple[set[tuple[str, int]], bool]:
+    """The (site, user id) a sweep pushes, and whether any part of finding them failed."""
+    targets: set[tuple[str, int]] = set()
     failed = False
     for site in discourse.sites():
         try:
             await discourse.create_role_groups(site)
-            user_ids = sorted(await discourse.user_ids(site))
+            targets |= {(site, user_id) for user_id in await discourse.user_ids(site)}
         except Exception:
             failed = True
             logger.exception("%s: failed", site)
-            continue
-        for user_id in user_ids:
-            try:
-                await push(site, user_id, lookup)
-            except Exception:
-                failed = True
-                logger.exception("%s: user %s failed", site, user_id)
     # A ban can fall on anyone who ever logged in, not only on those the sites list above.
     try:
         async with await db() as conn:
@@ -55,12 +62,11 @@ async def sweep() -> None:
                 continue
             for site in discourse.sites():
                 if found := await discourse.by_external_id(site, uid):
-                    await push(site, found["id"], lookup)
+                    targets.add((site, found["id"]))
         except Exception:
             failed = True
             logger.exception("member %s failed", uid)
-    if failed:
-        raise SystemExit(1)
+    return targets, failed
 
 
 async def push(site: str, user_id: int, lookup: Callable[[str], Awaitable[dict]]) -> None:

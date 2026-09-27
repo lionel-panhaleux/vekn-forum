@@ -25,7 +25,7 @@ BAN = {"level": "suspension", "expires_at": None}
 
 
 async def swept(site: str, uid: str) -> None:
-    """What a sweep does to one member, without walking every user of every site."""
+    """What a sweep does to one member it reaches, without pushing every user of every site."""
     token = await archon_api.daemon_token()
     user_id = (await discourse_user(site, uid))["id"]
     await sweep.push(site, user_id, lambda u: archon_api.member(u, token))
@@ -103,6 +103,7 @@ async def test_a_revoked_nc_loses_admin_without_logging_in(archon, browser):
     uid = archon.member(roles=["NC"], country="FR")
     await login(browser, "fr", handle())
     assert (await discourse_user("fr", uid))["admin"]
+    assert (await discourse_user("fr", uid))["id"] in await discourse.user_ids("fr")
     archon.members[uid]["roles"] = []
     await swept("fr", uid)
     user = await discourse_user("fr", uid)
@@ -159,6 +160,10 @@ async def test_a_ban_suspends_everywhere_and_its_lifting_unsuspends(archon, brow
     assert response.status_code == 403 and "suspended" in response.text
     assert suspended(await discourse_user("fr", uid))
     assert not suspended(await discourse_user("intl", uid))
+    # No role or group lists them on intl: only everyone-who-logged-in reaches them there.
+    token = await archon_api.daemon_token()
+    targets, failed = await sweep.reach(lambda u: archon_api.member(u, token))
+    assert ("intl", (await discourse_user("intl", uid))["id"]) in targets and not failed
     await swept("intl", uid)
     assert suspended(await discourse_user("intl", uid))
     archon.members[uid]["sanctions"] = []
@@ -184,18 +189,20 @@ async def test_a_ban_outranks_the_playtest_gate(archon, browser):
 async def test_a_lost_role_removes_its_language_groups(archon, browser):
     group = f"judge-{secrets.token_hex(3)}"
     created = await discourse.api("intl", "POST", "/admin/groups.json", data={"group[name]": group})
-    uid = archon.member(roles=["Judge"])
-    await login(browser, "intl", handle())
-    username = (await discourse_user("intl", uid))["username"]
     members = f"/groups/{created['basic_group']['id']}/members.json"
-    await discourse.api("intl", "PUT", members, data={"usernames": username})
-    archon.members[uid]["roles"] = ["Rulemonger"]
-    await swept("intl", uid)
-    assert group in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
-    archon.members[uid]["roles"] = []
-    await swept("intl", uid)
-    assert group not in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
-    await discourse.api("intl", "DELETE", f"/admin/groups/{created['basic_group']['id']}.json")
+    try:
+        uid = archon.member(roles=["Judge"])
+        await login(browser, "intl", handle())
+        username = (await discourse_user("intl", uid))["username"]
+        await discourse.api("intl", "PUT", members, data={"usernames": username})
+        archon.members[uid]["roles"] = ["Rulemonger"]
+        await swept("intl", uid)
+        assert group in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
+        archon.members[uid]["roles"] = []
+        await swept("intl", uid)
+        assert group not in {g["name"] for g in (await discourse_user("intl", uid))["groups"]}
+    finally:
+        await discourse.api("intl", "DELETE", f"/admin/groups/{created['basic_group']['id']}.json")
 
 
 async def test_the_bridge_root_links_every_site(archon, browser):

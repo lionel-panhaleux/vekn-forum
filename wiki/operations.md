@@ -34,13 +34,16 @@ points, logging in through archon beta (`archon.krcg.org`) as yourself. It reads
 `.local/discourse.env` and a dev archon client from `.local/archon.env` (`ARCHON_CLIENT_ID=…`,
 `ARCHON_CLIENT_SECRET=…`): registered on beta from Developer like production's, with `profile:email`
 and `api:read`, but its own client, with `http://localhost:8765/callback` as redirect URI. Leaving
-it — Ctrl-C, or `just stop` from elsewhere — stops the bridge and both containers.
+it — Ctrl-C, or `just stop` from elsewhere — stops the bridge and both containers, so each `just dev`
+starts cold: about three minutes of installs, migrations and provisioning.
 
 The tests serve their own bridge on `localhost:8767`, with its own database (`bridge_test`), and a
 stand-in archon on `127.0.0.1:8766` that speaks archon's documented contract
 ([dogmas.md#testing](dogmas.md#testing)), so `just dev` can stay up through a run. They share the
 sites: for the run, each site's login button points at the test bridge, and is pointed back after —
-a killed run leaves it there until the next run or `just dev`. The role groups are created at the
+a killed run leaves it there until the next run or `just dev`. Without a dev archon client, the
+tests need only `dev/discourse.sh`, which brings up the sites without the bridge; `just stop` stops
+them too. The role groups are created at the
 start of a run, as the first sweep after a deploy does.
 
 ## Bridge

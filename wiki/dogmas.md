@@ -64,7 +64,8 @@ refactors.
   scripted into role changes; archon itself is proven after deploy ([post-deploy.md](post-deploy.md)). *(2026-09-26.)*
 - **Trust the engine; test what we add.** *(2026-09-27.)* Discourse works: a test proves our
   bridge, provisioning and theme at their boundary with it, never Discourse's own behaviour, and
-  never a whole-site job where one member shows the behaviour (a sweep is tested on one member).
+  never a whole-site job where one member shows the behaviour: a sweep is tested on the member it
+concerns — that it reaches them, then what it does to them.
   A test that needs a sleep, a wait on a slow boot, or a large stand-in is challenged before it is
   written; the whole suite aims at under a minute against `just dev`.
 - Exception: property-style tests for genuinely hazardous invariants (parsing, concurrency) — the

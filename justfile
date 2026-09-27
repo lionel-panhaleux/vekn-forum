@@ -22,9 +22,10 @@ dev:
     : "${ARCHON_CLIENT_ID:?missing from .local/archon.env}" "${ARCHON_CLIENT_SECRET:?missing from .local/archon.env}"
     uv run uvicorn bridge:app --port 8765 --reload --reload-dir src
 
-# Stop whatever `just dev` started, from anywhere; stopping twice is harmless.
+# Stop whatever `just dev` started, from anywhere; stopping twice is harmless. The bridge is found by
+# its port: a pattern would also match any shell whose command line names it.
 stop:
-    -@pkill -f "uvicorn bridge:app --port 8765"
+    -@pids=$(lsof -ti tcp:8765 -sTCP:LISTEN) && kill $pids
     -@docker stop vekn-forum-discourse vekn-forum-discourse-db > /dev/null 2>&1
 
 lint:
