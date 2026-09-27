@@ -21,12 +21,17 @@ Every check must pass before a landing.
 `dev/discourse.sh` runs Discourse's own `discourse/discourse_dev` image (native arm64) as the
 container `vekn-forum-discourse`, from a checkout at `.local/discourse`, as a
 multisite of three sites — `fr.localhost`, `intl.localhost`, `playtest.localhost`, port 3000 —
-plus the bridge's Postgres (`vekn-forum-discourse-db`, port 5434). The Rails server and the
-frontend bundler run (its log: `/tmp/ember.log` in the container), no Sidekiq. It provisions each
+plus the bridge's Postgres (`vekn-forum-discourse-db`, port 5434). Rails runs in production mode:
+we never change Discourse's code, and development mode's reloading made every page cost half a
+second. The web server alone runs, serving its own assets — no nginx, no Sidekiq. The assets are
+built once per Discourse commit (Discourse downloads them prebuilt for a release; log:
+`.local/assets.log`), and per-IP limits are off, since the bridge and the tests reach every site
+from one address. It provisions each
 site with `discourse/site.rb` — the settings of [engine.md#login](engine.md#login), the base theme
 from `theme/`, the site's tokens from `discourse/sites/<site>/` when it has some, and the bridge's
 API key, the same script production runs — and writes the bridge's environment to
-`.local/discourse.env`. The Discourse commit it checks out is `discourse/ref`, production's too.
+`.local/discourse.env`, keeping each site's secret and API key across runs so a running bridge
+survives a re-provisioning. The Discourse commit it checks out is `discourse/ref`, production's too.
 `.local/` is gitignored; deleting it and both containers resets everything.
 
 `just dev` runs it, then serves the bridge on `localhost:8765`, where every local site's login button
@@ -35,7 +40,7 @@ points, logging in through archon beta (`archon.krcg.org`) as yourself. It reads
 `ARCHON_CLIENT_SECRET=…`): registered on beta from Developer like production's, with `profile:email`
 and `api:read`, but its own client, with `http://localhost:8765/callback` as redirect URI. Leaving
 it — Ctrl-C, or `just stop` from elsewhere — stops the bridge and both containers, so each `just dev`
-starts cold: about three minutes of installs, migrations and provisioning.
+starts cold: about half a minute, and a few minutes more the first time on a new Discourse commit.
 
 The tests serve their own bridge on `localhost:8767`, with its own database (`bridge_test`), and a
 stand-in archon on `127.0.0.1:8766` that speaks archon's documented contract

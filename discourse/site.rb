@@ -12,6 +12,9 @@ SiteSetting.enable_discourse_connect = true
 SiteSetting.email_editable = false
 SiteSetting.auth_overrides_email = true
 SiteSetting.force_https = ENV.fetch("SITE_URL").start_with?("https://")
+# Links and redirects carry a non-default port (the local stack's 3000) only when told it.
+url = URI(ENV.fetch("SITE_URL"))
+SiteSetting.port = url.port == url.default_port ? "" : url.port.to_s
 SiteSetting.backup_frequency = 1
 SiteSetting.notification_email = ENV["SITE_EMAIL"] if ENV["SITE_EMAIL"]
 if ENV["SITE_GATED"]
