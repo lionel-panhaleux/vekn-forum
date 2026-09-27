@@ -19,7 +19,7 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Judges | A section of the international site, moderated by Rulemongers; its language groups are created by an IC. |
 | Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
 | Base theme, card display | One theme, `theme/` in this repo, card display included, imported from its directory into every site by site provisioning and made its default. |
-| Community identity | Discourse settings on each site, from `discourse/sites/<site>/`: title, logo, small mark, heading font, and a light/dark palette pair — the tokens of [design.md#theming](design.md#theming). |
+| Community identity | Discourse settings on each site, from `discourse/sites/<site>/`: title, logo, small mark, heading font, a light/dark palette pair — the tokens of [design.md#theming](design.md#theming) — and its first sections ([design.md#category-icons](design.md#category-icons)). |
 | Legacy phpBB author | User from the phpBB3 importer, email kept; claimed as below. |
 
 **The base theme is installed from its directory, not from git.** *(Decided 2026-09-27.)* Discourse's

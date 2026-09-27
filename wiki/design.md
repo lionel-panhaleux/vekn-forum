@@ -82,8 +82,11 @@ icon here, for every site. Every icon is in the category icon picker of every si
 lists them in order, each a name in the site's language and a slug naming its kind in English, as
 code stays English; the slug gives the icon. Provisioning creates them while the site has no
 category of its own besides Uncategorized and Staff; after that they are the coordinator's, so a
-renamed, reordered or deleted section stays so. Staff keeps Discourse's permissions, admins and
-moderators, and takes its own icon.
+renamed, reordered or deleted section stays so — unless every one is deleted, which brings the
+starting set back. A General a member has already posted in counts as the site's own. Staff keeps
+Discourse's permissions, admins and moderators, and takes its own icon in place of Discourse's seeded
+shield, unless the coordinator has given it another. A section's colour is the site's accent, though
+only its icon shows it.
 
 | Kind of section | Icon | Figure |
 |---|---|---|
@@ -100,10 +103,10 @@ moderators, and takes its own icon.
 | Archives | `vekn-archives` | a coffin — torpor |
 | Playtest | `vekn-playtest` | masquerade mask |
 | Judges | `vekn-judges` | Auspex's eye |
+| Staff | `vekn-staff` | Ventrue's sword and sceptre |
 
 ## Sidebar
 
-| Staff | `vekn-staff` | Ventrue's sword and sceptre |
 **Every section is in the sidebar, unfolded, in the coordinator's order**, for visitors and members
 alike, while a site has at most 15 top-level sections: nothing to open to find one, and no per-
 member list to curate. The categories page stays reachable from the list's tabs (a dropdown on a

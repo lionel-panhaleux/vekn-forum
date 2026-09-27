@@ -57,9 +57,10 @@ removed =
   end
 categories_changed = removed.any?
 
-# Staff keeps Discourse's own permissions, admins (from archon) and moderators, and takes its kind's icon.
+# wiki/design.md#category-icons. Discourse seeds Staff with the shield emoji; any other look is the
+# coordinator's.
 staff = Category.find_by(id: SiteSetting.staff_category_id)
-if staff && staff.style_type != "icon"
+if staff && staff.icon.blank? && staff.emoji.in?([nil, "", "shield"])
   staff.update!(style_type: "icon", icon: "vekn-staff")
   categories_changed = true
 end
@@ -96,22 +97,24 @@ if (dir = ENV["SITE_IDENTITY_DIR"])
     [light, dark].each(&:save!)
     ColorScheme.publish_discourse_stylesheets!
   end
-  # A new site's sections (wiki/design.md#category-icons), created while it has none of its own: after
-  # that they are the coordinator's, so a renamed or deleted one stays so.
+  # This guard is what hands the sections over to the coordinator (wiki/design.md#category-icons); all
+  # or none, since a partial set would pass it for good.
   own = Category.where(parent_category_id: nil).where.not(id: [uncategorized.id, staff&.id].compact)
   if identity["sections"] && !own.exists?
     position = Category.maximum(:position).to_i
-    identity["sections"].each do |section|
-      Category.create!(
-        name: section["name"],
-        slug: section["slug"],
-        user: Discourse.system_user,
-        style_type: "icon",
-        icon: "vekn-#{section["slug"]}",
-        color: identity["palettes"]["light"]["tertiary"],
-        text_color: "FFFFFF",
-        position: position += 1,
-      )
+    Category.transaction do
+      identity["sections"].each do |section|
+        Category.create!(
+          name: section["name"],
+          slug: section["slug"],
+          user: Discourse.system_user,
+          style_type: "icon",
+          icon: "vekn-#{section["slug"]}",
+          color: identity["palettes"]["light"]["tertiary"],
+          text_color: "FFFFFF",
+          position: position += 1,
+        )
+      end
     end
     categories_changed = true
   end
