@@ -39,6 +39,10 @@ fmt:
 typecheck:
     uv run --group deploy ty check --error-on-warning
 
+# vekn.fr's phpBB dump into the local fr site; needs `just dev` up.
+import-phpbb dump:
+    discourse/import/run.sh {{ dump }}
+
 # Needs `just dev` up.
 test *args:
     uv run pytest {{ args }}

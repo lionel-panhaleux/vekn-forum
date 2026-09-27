@@ -11,6 +11,7 @@ Local dev, checks, CI and deploy.
 | `just lint` / `just fmt` | ruff check and format. |
 | `just typecheck` | ty, warnings as errors. |
 | `just test` | pytest; needs `just dev` up. `just test -k playtest` runs one. |
+| `just import-phpbb <dump.sql>` | vekn.fr's phpBB into the local fr site (below). |
 | `just deploy` | Deploy to production (below): shows every change, then asks; `--dry` only shows. |
 | `just secrets` | Edit the deploy's secrets (`deploy/secrets.sops.yaml`). |
 
@@ -50,6 +51,40 @@ a killed run leaves it there until the next run or `just dev`. Without a dev arc
 tests need only `dev/discourse.sh`, which brings up the sites without the bridge; `just stop` stops
 them too. The role groups are created at the
 start of a run, as the first sweep after a deploy does.
+
+## phpBB import
+
+`just import-phpbb <dump.sql>` imports vekn.fr's phpBB 3.3 into the local fr site
+(`discourse/import/run.sh`; `run.sh <dump> app /var/www/discourse` on a launcher host). It loads the
+dump's `phpbb3_` tables into a throwaway MariaDB (container `vekn-phpbb`, network `vekn-import`), then
+runs in the Discourse container, on the fr database: `prepare.rb`, Discourse's own
+`script/import_scripts/phpbb3.rb` with `phpbb-fr.yml`, then `finish.rb`. Every imported record keeps
+its phpBB id (`import_id`), so a re-run with a fresher dump adds only what is new. The bundle is
+Discourse's plus `mysql2` (`discourse/import/Gemfile`): Discourse's own `IMPORT=1` bundle declares
+sqlite3 twice at our ref. About 1,700 posts a minute, an hour and a half for vekn.fr. `docker rm -f
+vekn-phpbb` drops the dump's copy afterwards: it holds every member's email.
+
+What the forum becomes:
+
+- **Boards.** Each public board goes into the site's section of its kind (`vekn.sections`) or is
+  merged into one (`category_mappings`); the six regional boards become subcategories of Domaines de
+  France, with its icon. The private boards become restricted subcategories, created before any
+  topic lands so they are never public: Sujets supprimés (staff), Conclave V:EKN de Paris (staff),
+  Conclave V:EKN France (logged-in members, as phpBB's registered users). Playtest Ind is not
+  imported: its NDA content belongs to the playtest site.
+- **Members.** Every phpBB account, with its email: the legacy claim of
+  [engine.md#login](engine.md#login). A member who logged in before the import is given their phpBB
+  account's posts. Until claimed, an account keeps no phpBB admin or moderator right and gets no
+  digest. phpBB's groups are not carried over: roles are archon's. A guest's posts go to a suspended
+  placeholder. Two phpBB accounts with one address become one.
+- **Posts.** The importer turns BBCode into Markdown; `finish.rb` turns the card tag into
+  `[[Card Name]]` and the discipline and clan smilies (`:pot:`, `:!bruj:`) into icon tags
+  (`vekn.disciplines`, `vekn.clans`), deletes again what phpBB had hidden, and points in-post links to
+  the old forum at their new topics. A post whose phpBB account was deleted stays the system user's.
+  Private messages are not imported, nor attachments and avatars, whose files the dump lacks.
+- **Old URLs.** `/forum/viewforum.php?f=`, `/forum/viewtopic.php?t=` and `?p=` redirect to their
+  category, topic and post on the site; `www.vekn.fr/forum/` does only once vekn.fr sends `/forum/` to
+  it ([product.md#rollout](product.md#rollout)).
 
 ## Bridge
 

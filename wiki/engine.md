@@ -20,7 +20,7 @@ alternative a future agent will be tempted to redo — the identity requirement 
 | Role-wide English section (playtest, judges) | Visible to the whole role group, muted by default through that group's default notification levels: opt-in. |
 | Base theme, card display | One theme, `theme/` in this repo, card display included, imported from its directory into every site by site provisioning and made its default. |
 | Community identity | Discourse settings on each site, from `discourse/sites/<site>/`: title, logo, small mark, heading font, a light/dark palette pair — the tokens of [design.md#theming](design.md#theming) — and its first sections ([design.md#category-icons](design.md#category-icons)). |
-| Legacy phpBB author | User from the phpBB3 importer, email kept; claimed as below. |
+| Legacy phpBB author | User from Discourse's phpBB3 importer, email kept; claimed as below. The import itself: [operations.md#phpbb-import](operations.md#phpbb-import). |
 
 **The base theme is installed from its directory, not from git.** *(Decided 2026-09-27.)* Discourse's
 git import takes a whole repository, with no subdirectory: a remote git theme would need a
@@ -103,7 +103,8 @@ user table per site stays invisible.
 **Claiming a legacy account.** Imported phpBB users keep their email, so a member whose archon
 email matches is linked on first login — posts and username included, nothing to click. The email
 match relinks even a user already linked to another archon uid; archon's unique addresses keep
-that from happening. A dead legacy address, or a guest-post placeholder (`anonymous_users`,
+that from happening. A member who logged in before their community's import is linked the same way,
+by the import itself. A dead legacy address, or a guest-post placeholder (`anonymous_users`,
 `@no-email.invalid`), is merged by the site's coordinator through Discourse's admin user merge, which moves
 posts, quotes and mentions.
 

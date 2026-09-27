@@ -1,0 +1,129 @@
+# vekn.fr's phpBB 3.3 into the fr site (wiki/operations.md#phpbb-import): settings of Discourse's
+# stock importer (script/import_scripts/phpbb3/settings.yml documents every key), plus `vekn`,
+# which prepare.rb and finish.rb read.
+
+database:
+  type: MySQL
+  host: vekn-phpbb
+  port: 3306
+  username: root
+  password: phpbb
+  schema: phpbb
+  table_prefix: phpbb3_
+  batch_size: 1000
+
+import:
+  site_name:
+  new_categories: []
+  # Every forum not listed here is created by the importer under its parent's category: the regions'
+  # six boards under Domaines de France.
+  category_mappings:
+    - { source_category_id: 41, skip: true } # VTES: a container
+    - { source_category_id: 42, skip: true } # V:EKN France: a container
+    - { source_category_id: 46, skip: true } # Old Stuff: a container
+    - { source_category_id: 48, skip: true } # JDR: a container
+    - { source_category_id: 38, skip: true } # Playtest Ind: NDA, the playtest group only
+    - { source_category_id: 40, target_category_id: 6 } # Kindred Network → Le jeu
+    - { source_category_id: 51, target_category_id: 24 } # Le coin des artistes → Hors-sujet
+    - { source_category_id: 39, target_category_id: 24 } # JDR World of Darkness → Hors-sujet
+    - { source_category_id: 37, target_category_id: 24 } # Netrunner → Hors-sujet
+    - { source_category_id: 18, target_category_id: 7 } # Listes d'échanges → Échanges
+    - { source_category_id: 49, target_category_id: 45 } # Bibliodèque → Archives
+    - { source_category_id: 19, target_category_id: 45 } # Decks et Stratégie → Archives
+    - { source_category_id: 21, target_category_id: 45 } # Débriefs → Archives
+    - { source_category_id: 34, target_category_id: 45 } # Bac à sable → Archives
+    - { source_category_id: 52, target_category_id: 10 } # Démonstrations (Démo group) → Sujets supprimés
+    - { source_category_id: 50, target_category_id: 10 } # the rest of Sujets supprimés, admins only in phpBB
+    - { source_category_id: 26, target_category_id: 10 }
+    - { source_category_id: 22, target_category_id: 10 }
+    - { source_category_id: 8, target_category_id: 10 }
+    - { source_category_id: 30, target_category_id: 10 }
+    - { source_category_id: 35, target_category_id: 10 }
+  tag_mappings: {}
+  rank_mapping: {}
+  use_bbcode_to_md: false
+  phpbb_base_dir: /shared/import/data
+  site_prefix:
+    # A regex once the importer escapes its dots: posts link both hosts.
+    original: (?:www.)?vekn.fr/forum
+    new: ""
+  permalinks:
+    categories: true
+    topics: true
+    posts: true
+    prefix: forum
+  # The dump has neither the attachment nor the avatar files.
+  avatars: { uploaded: false, gallery: false, remote: false }
+  anonymous_users: true
+  passwords: false
+  bookmarks: true
+  attachments: false
+  private_messages: false
+  polls: true
+  likes: false
+  username_as_name: false
+  emojis: {}
+  custom_fields: []
+
+vekn:
+  # phpBB forum → the site's section, by slug, which takes its topics and becomes its parent's.
+  sections:
+    3: announcements
+    6: game
+    36: newcomers
+    5: rules
+    27: tournaments
+    7: trading
+    44: regions
+    28: international
+    29: association
+    24: offtopic
+    45: archives
+  # phpBB forum → a new subcategory of a section, readable only by the groups named.
+  restricted:
+    10: { name: Sujets supprimés, slug: deleted, parent: archives, groups: [staff] }
+    2: { name: Conclave V:EKN de Paris, slug: conclave-paris, parent: regions, groups: [staff] }
+    13: { name: Conclave V:EKN France, slug: conclave, parent: association, groups: [trust_level_0] }
+  # phpBB smilies drawing VTES icons (their images are not in the dump) → the icon tag naming it
+  # (wiki/design.md#theming): a discipline's code is its tag, capitalised for superior.
+  disciplines: [abo, ani, aus, cel, chi, dai, dem, dom, for, mel, myt, nec, obe, obf, obt, pot, pre, pro, qui, san, ser, spi, tem, tha, thn, val, vic, vis]
+  clans:
+    abom: Abominations
+    ahri: Ahrimanes
+    akun: Akunanse
+    assa: Banu Haqim
+    baal: Baali
+    bb: Blood Brother
+    bruj: Brujah
+    cait: Caitiff
+    doc: Daughters of Cacophony
+    gang: Gangrel
+    garg: Gargoyles
+    giov: Giovanni
+    guru: Guruhi
+    hos: Harbingers of Skulls
+    isht: Ishtarri
+    kias: Kiasyd
+    laso: Lasombra
+    malk: Malkavian
+    naga: Nagaraja
+    nosfe: Nosferatu
+    oseb: Osebo
+    pand: Pander
+    ravn: Ravnos
+    salu: Salubri
+    same: Samedi
+    seth: Ministry
+    tbruj: True Brujah
+    tore: Toreador
+    trem: Tremere
+    tzim: Tzimisce
+    vent: Ventrue
+    "!bruj": Brujah antitribu
+    "!gang": Gangrel antitribu
+    "!malk": Malkavian antitribu
+    "!nosfe": Nosferatu antitribu
+    "!salu": Salubri antitribu
+    "!tore": Toreador antitribu
+    "!trem": Tremere antitribu
+    "!vent": Ventrue antitribu
