@@ -57,8 +57,9 @@ small mark, a palette pair (light and dark, the accent being the palette's `tert
 heading font from Discourse's list. Tokens are Discourse's own settings, not theme settings
 ([engine.md](engine.md#model-mapping)); a site without its own wears the base palettes, archon's. Their one home is `discourse/sites/<site>/`: a coordinator's rare identity change is a change there, since the next provisioning rewrites an edit made in Discourse's admin.
 Text is in the device's own font on every site, headings too unless the site names one: Discourse's
-Inter is 352 KB, a quarter of a phone's first visit. Components every site needs, such as VTES card display, belong to the base theme. A need a token
-cannot express is a change to the base theme, for every site.
+Inter is 352 KB, a quarter of a phone's first visit. Components every site needs, such as VTES card
+display, belong to the base theme. A need a token cannot express is a change to the base theme, for
+every site.
 
 A site follows the device's light or dark mode; a member can pin either from the toggle at the foot of
 the sidebar, as in archon.
