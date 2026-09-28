@@ -116,10 +116,13 @@ only its icon shows it.
 ## Sidebar
 
 **Every section is in the sidebar, unfolded, in the coordinator's order**, for visitors and members
-alike, while a site has at most 15 top-level sections: nothing to open to find one, and no per-
-member list to curate. The categories page stays reachable from the list's tabs (a dropdown on a
-phone), so the sidebar drops its link to it. Past 15, Discourse's own sidebar returns, each member's
-saved list with it.
+alike: nothing to open to find one. It is Discourse's own default sidebar list
+(`default_navigation_menu_categories`), which `site.rb` fills with every top-level section while it
+is empty, members included; from then on the list is the coordinator's, and a section they add
+reaches existing members when they save the setting with its update-existing-users option. A member
+may edit their own. The categories page stays reachable from the list's tabs (a dropdown on a
+phone), so the sidebar drops its link to it. *(Decided 2026-09-28: an in-memory list in the theme
+was undone whenever Discourse reloaded the member, as on their own profile.)*
 
 ## Console
 

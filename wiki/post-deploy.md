@@ -60,7 +60,7 @@ the first sweep, and is unsuspended on both after the second.
 
 Gated by the commits "Theme every site from a shared base, and dress fr in France's tokens", "Give
 sections VEKN icons, and members a light/dark toggle" and "Show every section in the sidebar,
-unfolded, and switch chat off" and "Add a cards-and-icons picker to every composer's toolbar".
+unfolded, and switch chat off", "Give members the sections through Discourse's default sidebar list" and "Add a cards-and-icons picker to every composer's toolbar".
 In a browser with its interface in French, open `https://fr.forum.krcg.org` in light and dark
 system mode, then post `[[Anson]] et [[Diriger les indécis]]`
 in a test topic, then open a reply, tap the toolbar's cards button and type `Sang`.
@@ -71,5 +71,6 @@ French; on a phone, a tap shows it and another dismisses it. The picker lists Fr
 reply. The sidebar's foot has the light/dark toggle, and a category set to a `vekn-*` icon in its
 settings shows it in the accent. Neither site's categories page lists General, Site Feedback or
 Uncategorized. Logged out and logged in, the sidebar lists every section unfolded in the categories
-page's order, with no "all categories" link, and no chat bubble or chat section shows.
+page's order, with no "all categories" link, still after opening your own profile's activity, and
+no chat bubble or chat section shows.
 `https://intl.forum.krcg.org` wears the base palettes.

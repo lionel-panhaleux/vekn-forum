@@ -133,6 +133,16 @@ if (dir = ENV["SITE_IDENTITY_DIR"])
 end
 theme.update!(color_scheme: light, dark_color_scheme: dark)
 
+# wiki/design.md#sidebar: every member starts with every section, the coordinator's list once it
+# names one. Discourse's seeding puts its Staff category there.
+listed = SiteSetting.default_navigation_menu_categories
+sections = Category.where(parent_category_id: nil).where.not(id: [uncategorized.id, staff&.id].compact)
+if !sections.exists?(id: listed.split("|"))
+  ids = Category.where(parent_category_id: nil).where.not(id: uncategorized.id).order(:position).pluck(:id).join("|")
+  SiteSetting.default_navigation_menu_categories = ids
+  SidebarSiteSettingsBackfiller.new("default_navigation_menu_categories", previous_value: listed, new_value: ids).backfill!
+end
+
 if categories_changed
   # The web processes cache categories per locale; a change here clears only this process's.
   I18n.available_locales.each { |locale| I18n.with_locale(locale) { Site.clear_cache } }
