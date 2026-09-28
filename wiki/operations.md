@@ -61,8 +61,8 @@ the run and removed after it, since it holds every member's email, then
 runs in the Discourse container, on the fr database: `prepare.rb`, Discourse's own
 `script/import_scripts/phpbb3.rb` with `phpbb-fr.yml`, then `finish.rb`. Every imported record keeps
 its phpBB id (`import_id`), so a re-run with a fresher dump adds only what is new. The bundle is
-Discourse's plus `mysql2` (`discourse/import/Gemfile`). About 1,700 posts a minute, an hour and a
-half for vekn.fr.
+Discourse's plus `mysql2` (`discourse/import/Gemfile`). vekn.fr took an hour and a half locally,
+five and a half hours on frankfurt beside the live sites.
 
 What the forum becomes:
 
