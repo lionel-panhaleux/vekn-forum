@@ -80,14 +80,16 @@ async def test_a_legacy_account_with_the_same_email_is_claimed_not_duplicated(ar
     uid = archon.member()
     old = handle()
     email = archon.members[uid]["email"]
-    fields = {"username": old, "email": email, "password": secrets.token_hex(16), "active": "true"}
-    await discourse.api("fr", "POST", "/users.json", data=fields)  # as the phpBB import leaves it
+    fields = {"username": old, "email": email, "password": secrets.token_hex(16)}
+    created = await discourse.api("fr", "POST", "/users.json", data=fields)
+    assert created["active"] is False, created  # as the phpBB import leaves it
     response = await login(browser, "fr")
     assert response.json()["current_user"]["username"] == old
     user = await discourse_user("fr", uid)
     legacy = await discourse.api("fr", "GET", "/admin/users/list/all.json", params={"email": email})
     assert [u["id"] for u in legacy] == [user["id"]]
     assert user["username"] == old
+    assert user["active"]
 
 
 async def test_an_nc_is_admin_on_their_own_site_only(archon, browser):

@@ -13,7 +13,7 @@ DB=vekn-phpbb
 docker rm -f "$DB" > /dev/null 2>&1 || true
 docker network create vekn-import > /dev/null 2>&1 || true
 # Leaving the container on the network would keep it from starting once the network is gone.
-trap 'docker rm -f "$DB" > /dev/null; docker network disconnect vekn-import "$NAME"; docker network rm vekn-import > /dev/null' EXIT
+trap 'docker rm -f "$DB" > /dev/null || true; docker network disconnect vekn-import "$NAME" || true; docker network rm vekn-import > /dev/null || true' EXIT
 docker run -d --name "$DB" --network vekn-import -e MARIADB_ROOT_PASSWORD=phpbb \
     -e MARIADB_DATABASE=phpbb mariadb:10.11 --max_allowed_packet=256M > /dev/null
 docker network connect vekn-import "$NAME" 2> /dev/null || true

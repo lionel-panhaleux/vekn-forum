@@ -70,19 +70,22 @@ What the forum becomes:
   merged into one (`category_mappings`); the six regional boards and the four archived ones become
   subcategories of Domaines de France and Archives, with their icon. The private boards become
   restricted subcategories (`vekn.restricted`), staff-only from before any topic lands so they are
-  never public, then opened to the groups phpBB granted them — archon's role group in place of
-  phpBB's copy of a role: Sujets supprimés, Conclave V:EKN de Paris, Conclave V:EKN France, and
-  Playtest Ind, whose NDA content only PT and PTC holders read.
+  never public, then opened to the groups phpBB granted them, `trust_level_0` for its registered
+  members — archon's role group in place of phpBB's copy of a role, so `prince` and `judge` admit
+  every holder of that role, not phpBB's French list. A board is merged into a restricted one only
+  if it was readable by at least everyone who reads that one. Playtest Ind's NDA content is read by
+  PT and PTC holders and the site's staff ([engine.md#model-mapping](engine.md#model-mapping)). The
+  role groups must exist before the import, as the first sweep after a deploy leaves them.
 - **Groups.** phpBB's groups are kept under the names `vekn.groups` gives them, members and owners
   included, each visible to its members and staff: they are the coordinator's
   ([engine.md#model-mapping](engine.md#model-mapping)). Those copying an archon role (Judges, Prince,
   Playtest) are not.
 - **Members.** Every phpBB account, with its email: the legacy claim of
   [engine.md#login](engine.md#login). A member who logged in before the import is given their phpBB
-  account's posts. Until claimed, an account keeps no phpBB admin or moderator right and is sent no
-  mail at all: a reply to a years-old topic would otherwise mail its author's old address; a claimed
-  member turns mail back on in their preferences. A guest's posts go to a suspended placeholder. Two
-  phpBB accounts with one address become one.
+  account's posts. Until claimed, an account keeps no phpBB admin or moderator right and is
+  inactive, so Discourse mails it nothing: a reply to a years-old topic would otherwise mail its
+  author's old address. The claim's login activates it. A guest's posts go to a suspended
+  placeholder. Two phpBB accounts with one address become one.
 - **Posts.** The importer turns BBCode into Markdown; `finish.rb` turns the card tag into
   `[[Card Name]]` and the discipline and clan smilies (`:pot:`, `:!bruj:`) into icon tags
   (`vekn.disciplines`, `vekn.clans`), deletes again what phpBB had hidden, and points in-post links to

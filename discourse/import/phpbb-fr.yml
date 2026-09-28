@@ -27,13 +27,11 @@ import:
     - { source_category_id: 39, target_category_id: 24 } # JDR World of Darkness → Hors-sujet
     - { source_category_id: 37, target_category_id: 24 } # Netrunner → Hors-sujet
     - { source_category_id: 18, target_category_id: 7 } # Listes d'échanges → Échanges
-    - { source_category_id: 52, target_category_id: 10 } # Démonstrations (Démo group) → Sujets supprimés
-    - { source_category_id: 50, target_category_id: 10 } # the rest of Sujets supprimés, admins only in phpBB
-    - { source_category_id: 26, target_category_id: 10 }
-    - { source_category_id: 22, target_category_id: 10 }
-    - { source_category_id: 8, target_category_id: 10 }
-    - { source_category_id: 30, target_category_id: 10 }
-    - { source_category_id: 35, target_category_id: 10 }
+    # A board merged into a restricted one was readable by at least everyone who reads that one.
+    - { source_category_id: 50, target_category_id: 10 } # Old Stuff → Sujets supprimés
+    - { source_category_id: 22, target_category_id: 8 } # Soirées Jeux → Anciens forums privés
+    - { source_category_id: 26, target_category_id: 8 } # Blood Bowl → Anciens forums privés
+    - { source_category_id: 30, target_category_id: 8 } # CF 2008 → Anciens forums privés
   tag_mappings: {}
   rank_mapping: {}
   use_bbcode_to_md: false
@@ -80,7 +78,10 @@ vekn:
     10: { name: Sujets supprimés, slug: deleted, parent: archives, groups: [staff, vekn-france, prince, judge] }
     38: { name: Playtest Ind, slug: playtest, parent: archives, groups: [staff, pt, ptc] }
     2: { name: Conclave V:EKN de Paris, slug: conclave-paris, parent: regions, groups: [staff, vekn-paris] }
-    13: { name: Conclave V:EKN France, slug: conclave, parent: association, groups: [staff, vekn-france, alastors] }
+    13: { name: Conclave V:EKN France, slug: conclave, parent: association, groups: [staff, trust_level_0] }
+    8: { name: Anciens forums privés, slug: private-archives, parent: archives, groups: [staff] }
+    35: { name: EC 2010, slug: ec-2010, parent: archives, groups: [staff, ec-2010] }
+    52: { name: Organisation de démonstrations, slug: demos, parent: newcomers, groups: [staff, demo] }
   # phpBB group → its name on the site, visible to its members and staff; a group not listed is not
   # kept: Judges, Prince and Playtest copied archon roles.
   groups:

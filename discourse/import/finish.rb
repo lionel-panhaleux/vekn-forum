@@ -33,7 +33,7 @@ Category
   end
 
 # The importer rewrites a link to a topic it has already imported; the rest are resolved here through
-# the permalinks, and a link to what was never imported (Playtest Ind) keeps the old host.
+# the permalinks, and a link to what phpBB itself no longer had keeps the old host.
 legacy = %r{https?://(?:www\.)?vekn\.fr/forum/((?:viewtopic|viewforum)\.php\?[^\s)\]"<]*)}i
 icons = settings["vekn"]["disciplines"].flat_map { [[it, it], [it.upcase, it.upcase]] }.to_h
 icons.merge!(settings["vekn"]["clans"])
@@ -59,12 +59,10 @@ legacy_users.where("admin OR moderator").find_each do |user|
   user.update!(admin: false, moderator: false)
   puts "revoked the phpBB rights of #{user.username}"
 end
-UserOption.where(user_id: legacy_users.select(:id)).update_all(
-  email_digests: false,
-  email_level: UserOption.email_level_types[:never],
-  email_messages_level: UserOption.email_level_types[:never],
-  mailing_list_mode: false,
-)
+# Discourse mails no inactive user, and DiscourseConnect activates the account it logs in; it also
+# purges an inactive user without posts after this grace period, which the importer sets.
+legacy_users.update_all(active: false)
+SiteSetting.purge_unactivated_users_grace_period_days = 0
 
 # The importer fails to create a second phpBB account with an address already taken, and gives its
 # posts to the system user: they go to the account holding that address.

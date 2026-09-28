@@ -12,7 +12,7 @@ alternative a future agent will be tempted to redo — the identity requirement 
 |---|---|
 | National community (France, Germany, …) | One **site** of the multisite: own database, theme, locale, settings, admins, domain. |
 | International community | Its own site. |
-| Playtest community | Its own site, NDA content isolated in its own database. Two locks: the bridge admits only PT and PTC holders to it, and every category's security grants the `pt` and `ptc` role groups only, `everyone` removed. `login_required`, not indexed. |
+| Playtest community | Its own site, NDA content isolated in its own database — except the France site's Playtest Ind board, imported from its phpBB and read by PT and PTC holders and fr's staff, who hold PT *(decided 2026-09-28)*. Two locks: the bridge admits only PT and PTC holders to it, and every category's security grants the `pt` and `ptc` role groups only, `everyone` removed. `login_required`, not indexed. |
 | Coordinator | `admin` on their community's site: an NC on the site of their archon `country`, ICs on the international site, **every PTC** on the playtest site. *(Decided 2026-09-26.)* |
 | Section | A category (subcategories for cities under a region), plus its **section group**, which watches the category's first posts by default. Playgroup groups are open to join; language groups (`pt-fr`, `judge-fi`, …) are added to by their owner only, and their category is visible to that group alone. |
 | Community group (an association's members, organizers) | A Discourse group of the site, created and filled by its coordinator, facts archon does not hold; a private category is opened to it. A group only a role's holders may join is named with that role's prefix (below), or the category is opened to the role's group itself. |
@@ -105,7 +105,8 @@ user table per site stays invisible.
 **Claiming a legacy account.** Imported phpBB users keep their email, so a member whose archon
 email matches is linked on first login — posts and username included, nothing to click. The email
 match relinks even a user already linked to another archon uid; archon's unique addresses keep
-that from happening. A member who logged in before their community's import is linked the same way,
+that from happening. An imported account stays inactive until claimed, and the claim's login
+activates it. A member who logged in before their community's import is linked the same way,
 by the import itself. A dead legacy address, or a guest-post placeholder (`anonymous_users`,
 `@no-email.invalid`), is merged by the site's coordinator through Discourse's admin user merge, which moves
 posts, quotes and mentions.
