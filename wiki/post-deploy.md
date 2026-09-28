@@ -74,3 +74,13 @@ Uncategorized. Logged out and logged in, the sidebar lists every section unfolde
 page's order, with no "all categories" link, still after opening your own profile's activity, and
 no chat bubble or chat section shows.
 `https://intl.forum.krcg.org` wears the base palettes.
+
+## No site downloads Inter
+
+Gated by the commit "Read every site in the device's own font". On `https://fr.forum.krcg.org` and
+`https://intl.forum.krcg.org`, list the fonts the palette stylesheets declare:
+`curl -s --compressed -H 'Accept: text/html' <site>/latest`, then each `color_definitions_*.css` it
+links, grepped for `/fonts/`.
+
+It worked when neither names `InterVariable`, fr still names `PlayfairDisplay`, and a phone's first
+visit to fr shows body text in its system font (San Francisco, Roboto) under Playfair headings.

@@ -75,13 +75,18 @@ theme = RemoteTheme.import_theme_from_directory(ENV.fetch("SITE_THEME_DIR"), the
 theme.set_default!
 Theme.where.not(id: theme.id).where(user_selectable: true).find_each { |t| t.update!(user_selectable: false) }
 
+# The device's own font (wiki/design.md#theming), where Discourse defaults both to Inter; a site's
+# identity may name its heading font.
+SiteSetting.base_font = "system"
+SiteSetting.heading_font = "system" if !ENV["SITE_IDENTITY_DIR"]
+
 # The site's tokens. Its palettes are not the theme's own: a re-import deletes the theme's palettes
 # its about.json does not list.
 light, dark = theme.color_schemes.find_by(name: "VEKN"), theme.color_schemes.find_by(name: "VEKN Dark")
 if (dir = ENV["SITE_IDENTITY_DIR"])
   identity = JSON.parse(File.read(File.join(dir, "identity.json")))
   SiteSetting.title = identity["title"]
-  SiteSetting.heading_font = identity["heading_font"] || SiteSetting.defaults[:heading_font]
+  SiteSetting.heading_font = identity["heading_font"] || "system"
   changed = false
   light, dark =
     { "" => "light", " Dark" => "dark" }.map do |suffix, mode|

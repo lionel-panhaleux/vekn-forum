@@ -54,3 +54,16 @@ def test_no_site_lists_discourse_stock_categories():
         url = os.environ[f"DISCOURSE_{site.upper()}_URL"]
         listed = httpx.get(f"{url}/categories.json").json()["category_list"]["categories"]
         assert {"general", "site-feedback", "uncategorized"}.isdisjoint(c["slug"] for c in listed)
+
+
+def test_every_site_reads_in_the_devices_font():
+    for site, heading in (("fr", {"PlayfairDisplay"}), ("intl", set())):
+        url = os.environ[f"DISCOURSE_{site.upper()}_URL"]
+        page = httpx.get(f"{url}/latest", headers={"Accept": "text/html"}).text
+        # Discourse declares a site's fonts in its palette stylesheets; JetBrains Mono is for code.
+        css = "".join(
+            httpx.get(httpx.URL(url).join(href)).text
+            for href in re.findall(r'href="([^"]*/color_definitions_[^"]+)"', page)
+        )
+        assert css, site
+        assert set(re.findall(r"/fonts/([A-Za-z]+)[-.]", css)) - {"JetBrainsMono"} == heading, site
