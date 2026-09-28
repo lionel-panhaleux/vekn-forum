@@ -25,10 +25,13 @@ awk '/^-- Table structure for table `/ { keep = ($0 ~ /`phpbb3_/) } /^\/\*!40103
 docker exec "$NAME" sh -c 'dpkg -s libmariadb-dev > /dev/null 2>&1 || (apt-get update -qq && apt-get install -y -qq libmariadb-dev > /dev/null)'
 docker exec "$NAME" rm -rf /tmp/vekn-import
 docker cp . "$NAME":/tmp/vekn-import
-docker exec "$NAME" sh -c "cp $ROOT/Gemfile.lock /tmp/vekn-import/ && chown -R discourse:discourse /tmp/vekn-import"
+docker exec "$NAME" sh -c "chown -R discourse:discourse /tmp/vekn-import"
+docker exec -u discourse:discourse "$NAME" sh -c \
+    "cp /tmp/vekn-import/Gemfile $ROOT/Gemfile.vekn-import && cp $ROOT/Gemfile.lock $ROOT/Gemfile.vekn-import.lock"
+# A launcher image's bundle is in deployment mode, which forbids the gem this bundle adds.
 run() {
     docker exec -u discourse:discourse -w "$ROOT" -e RAILS_ENV=production -e RAILS_DB=fr \
-        -e DISCOURSE_ROOT="$ROOT" -e BUNDLE_GEMFILE=/tmp/vekn-import/Gemfile \
+        -e BUNDLE_GEMFILE="$ROOT/Gemfile.vekn-import" -e BUNDLE_DEPLOYMENT=false -e BUNDLE_FROZEN=false \
         -e IMPORT_SETTINGS=/tmp/vekn-import/phpbb-fr.yml "$NAME" "$@"
 }
 run bundle install --quiet

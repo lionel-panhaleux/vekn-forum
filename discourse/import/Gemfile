@@ -1,3 +1,4 @@
 # Discourse's bundle plus mysql2 for its phpBB importer: its own IMPORT=1 bundle declares sqlite3 twice.
-eval_gemfile File.join(ENV.fetch("DISCOURSE_ROOT"), "Gemfile")
+# Copied beside Discourse's Gemfile, whose directory holds the bundle's settings.
+eval_gemfile File.join(__dir__, "Gemfile")
 gem "mysql2"
