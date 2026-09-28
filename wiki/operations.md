@@ -84,7 +84,9 @@ What the forum becomes:
   [engine.md#login](engine.md#login). A member who logged in before the import is given their phpBB
   account's posts. Until claimed, an account keeps no phpBB admin or moderator right and is
   inactive, so Discourse mails it nothing: a reply to a years-old topic would otherwise mail its
-  author's old address. The claim's login activates it. A guest's posts go to a suspended
+  author's old address. The claim's login activates it. The site's
+  `purge_unactivated_users_grace_period_days` stays 0: any other value deletes the post-less ones,
+  group members among them. A guest's posts go to a suspended
   placeholder. Two phpBB accounts with one address become one.
 - **Posts.** The importer turns BBCode into Markdown; `finish.rb` turns the card tag into
   `[[Card Name]]` and the discipline and clan smilies (`:pot:`, `:!bruj:`) into icon tags

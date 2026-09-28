@@ -27,7 +27,7 @@ import:
     - { source_category_id: 39, target_category_id: 24 } # JDR World of Darkness → Hors-sujet
     - { source_category_id: 37, target_category_id: 24 } # Netrunner → Hors-sujet
     - { source_category_id: 18, target_category_id: 7 } # Listes d'échanges → Échanges
-    # A board merged into a restricted one was readable by at least everyone who reads that one.
+    # The merge rule into a restricted board: wiki/operations.md#phpbb-import.
     - { source_category_id: 50, target_category_id: 10 } # Old Stuff → Sujets supprimés
     - { source_category_id: 22, target_category_id: 8 } # Soirées Jeux → Anciens forums privés
     - { source_category_id: 26, target_category_id: 8 } # Blood Bowl → Anciens forums privés
